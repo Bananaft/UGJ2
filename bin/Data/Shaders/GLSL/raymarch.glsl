@@ -36,32 +36,7 @@ void VS()
 }
 
 
-vec3 calcNormal( in vec3 pos , float size )
-{
-	vec3 eps = vec3( size,  0.0, 0.0 );
-	vec3 nor = vec3(
-	    sdfmap(pos+eps.xyy).w - sdfmap(pos-eps.xyy).w,
-	    sdfmap(pos+eps.yxy).w - sdfmap(pos-eps.yxy).w,
-	    sdfmap(pos+eps.yyx).w - sdfmap(pos-eps.yyx).w );
-	return normalize(nor);
-}
 
-float calcAO( in vec3 pos, in vec3 nor )
-{
-	float occ = 0.0;
-  float stp = 0.1;
-
-  for( int i=1; i<4; i++ )
-    {
-        stp *= i * 2.;
-        vec3 aopos =  nor * stp + pos;
-        float dd = sdfmap( aopos ).w;
-        occ += dd;
-        //if (dd<stp) break;
-    }
-
-    return min(occ * 0.3,1.);
-}
 
 
 void PS()
@@ -79,6 +54,7 @@ void PS()
   float lfog = 0.;
   float pxsz = fov * cGBufferInvSize.y;
 
+
   float distTrsh = 0.002;
   int stps = 0;
 
@@ -91,8 +67,8 @@ void PS()
       totalDistance += distance.w;
        #ifdef PREMARCH
           distTrsh = pxsz * totalDistance * 1.4142;
-          totalDistance -= distTrsh * 0.5;
           if(distance.w <= distTrsh || totalDistance >= cFarClipPS) break;
+          totalDistance += distTrsh * 0.5;
         #else
           if(distance.w <= 0.002 || totalDistance >= cFarClipPS) break;
        #endif
@@ -116,26 +92,37 @@ void PS()
 
       if (fdepth>depth) discard;
 
-      //float mimus = max( -1000000. * (fdepth - PREdepth), 0.0 );
-      //float plus = max( 10. * (fdepth - PREdepth), 0.0 );
-      //Normal softening powered by magic.
-      normal = calcNormal(intersection, max(pow(totalDistance,1.25) * pxsz,0.001));
-      float ao = calcAO(intersection,normal);
-      float fog = min(pow(fdepth * 6.,1.5),1.);//
+      vec3 col = vec3(1.0);
+
+      float shad = 0.2;
+      vec3 lightVec = vec3(0.3,-0.4,0.2);
+
+      for (int i=0; i<6; i++)
+      {
+        intersection += lightVec * shad;
+        distance = sdfmap(intersection);
+        shad += distance.w;
+      }
+
+      shad = max(1.-(shad*0.6),0.);
+
+      col*=shad;
+
+      float fog = min(pow(fdepth * 6.,0.5),1.);//
   #endif
 
 
 
   //gl_FragColor = vec4(ambient , 1.0);
   #ifndef PREMARCH
-    gl_FragData[0] = vec4(mix(0.002 , ao * (1.-fog),1.-fog));//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
-    gl_FragData[1] = vec4(diffColor.rgb * (1.-fog), 1.0 );
+    gl_FragData[0] = vec4(mix(col,vec3(0.),fog),0.);//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
+    gl_FragData[1] = vec4(0.5);
     //gl_FragData[0] = vec4(float(stps)/256,0.,0.,0.);//vec4(float(stps)/cRAY_STEPS,0.,0.,0.);//vec4(mimus , plus,0.,0.); //vec4(vec3(0.3) * (1.-fog),1.0);
     //gl_FragData[1] = vec4(0.);//vec4(diffColor.rgb * fog, 1.7 );
 
 
 
-    gl_FragData[2] = vec4(0.5 + normal*0.5, ao);// * 0.5 + 0.5
+    gl_FragData[2] = vec4(0.5);// * 0.5 + 0.5
     gl_FragData[3] = vec4(EncodeDepth(fdepth), 0.0);//
   #else
     gl_FragColor =  vec4(totalDistance ,0. , 0. , 0.);

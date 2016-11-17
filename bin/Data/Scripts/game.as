@@ -6,6 +6,9 @@ IntVector2 gres = IntVector2(640,360);
 Viewport@ rttViewport;
 RenderSurface@ surface;
 Texture2D@ renderTexture;
+
+RenderPath@ renderpath;
+
 float yaw = 0.0f; // Camera ya
 
 void Start()
@@ -16,6 +19,8 @@ void Start()
 	CreateConsoleAndDebugHud();
 
 	SubscribeToEvent("KeyDown", "HandleKeyDown");
+	
+//	renderer.hdrRendering = true;
 
   //SCENE
 	scene_.CreateComponent("Octree");
@@ -38,6 +43,17 @@ void Start()
 	Node@ fakeboxNode = scene_.CreateChild("Plane");
 	StaticModel@ fakeboxObject = fakeboxNode.CreateComponent("StaticModel");
 	fakeboxObject.model = cache.GetResource("Model", "Models/Sphere.mdl");
+	
+	/*Viewport@ mainVP = Viewport(scene_, camera);
+	renderer.viewports[0] = mainVP;
+	
+	renderpath = mainVP.renderPath.Clone();
+
+	renderpath.Load(cache.GetResource("XMLFile","RenderPaths/Deferred.xml"));
+	
+	
+	renderer.viewports[0].renderPath = renderpath;*/
+	
 	
 	
 	renderTexture = Texture2D();
