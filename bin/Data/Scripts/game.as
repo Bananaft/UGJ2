@@ -21,12 +21,10 @@ void Start()
 
 	SubscribeToEvent("KeyDown", "HandleKeyDown");
 	
-//	renderer.hdrRendering = true;
-
   //SCENE
 	scene_.CreateComponent("Octree");
 	
-	renderer.hdrRendering = true;
+//	renderer.hdrRendering = true;
 	
 	Node@ zoneNode = scene_.CreateChild("Zone");
     Zone@ zone = zoneNode.CreateComponent("Zone");
