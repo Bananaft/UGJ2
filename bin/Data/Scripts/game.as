@@ -6,6 +6,7 @@ IntVector2 gres = IntVector2(640,360);
 Viewport@ rttViewport;
 RenderSurface@ surface;
 Texture2D@ renderTexture;
+Texture2D@ logTex;
 
 RenderPath@ renderpath;
 
@@ -36,7 +37,7 @@ void Start()
 	camNode = scene_.CreateChild("CamNode");
 	Camera@ camera = camNode.CreateComponent("Camera");
 	camNode.position = Vector3(10,20,-30);
-	
+	camera.farClip = 200;
 	freelookCam@ flcam = cast<freelookCam>(camNode.CreateScriptObject(scriptFile, "freelookCam"));
     flcam.Init();
 	
@@ -71,6 +72,22 @@ void Start()
 	surface.viewports[0] = rttViewport;
     surface.updateMode = SURFACE_UPDATEALWAYS;
 	
+	logTex = Texture2D();
+    logTex.SetSize(1, 1, GetRGBFormat(), TEXTURE_RENDERTARGET);
+    logTex.filterMode = FILTER_NEAREST;
+	
+	RenderSurface@ surface2 = logTex.renderSurface;
+    Viewport@ logVpt = Viewport(scene_, camNode.GetComponent("Camera"));
+	logVpt.rect = IntRect(0,0,1,1);
+	
+	RenderPath@ rndpth2 = logVpt.renderPath.Clone();
+	rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+	logVpt.renderPath = rndpth2;
+	
+	surface2.viewports[0] = logVpt;
+    surface2.updateMode = SURFACE_UPDATEALWAYS;
+	
+	
 	Sprite@ screen = Sprite();
 	screen.texture = renderTexture;
 	screen.size = gres * 2;
@@ -79,6 +96,12 @@ void Start()
 	screen.horizontalAlignment = HA_CENTER;
 	ui.root.AddChild(screen);
 	
+	
+	Sprite@ screen2 = Sprite();
+	screen2.texture = logTex;
+	screen2.size = IntVector2(10,10);
+	
+	ui.root.AddChild(screen2);
 	
 	UIElement@ LegendNode = ui.root.CreateChild("UIElement");
 	LegendNode.SetPosition(200 , 10);
@@ -118,7 +141,7 @@ void CreateConsoleAndDebugHud()
 
 void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
     {
-
+		
     }
 	
 void HandleKeyDown(StringHash eventType, VariantMap& eventData)
@@ -152,4 +175,7 @@ void HandleKeyDown(StringHash eventType, VariantMap& eventData)
 		screenshot.SavePNG(fileSystem.programDir + "Data/Screenshot_" +
 			time.timeStamp.Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_') + ".png");
 	}
+	
+	Image@ img =logTex.GetImage();
+	log.Info(img.GetPixel(0,0).r);
 }

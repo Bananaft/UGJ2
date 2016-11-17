@@ -23,7 +23,7 @@
 
     <command type="quad" tag="premarch" vs="raymarch" ps="raymarch" psdefines="PREMARCH" output="depth2">
       <texture unit="specular" name="depth3" />
-      <parameter name="RAY_STEPS" value="60" />
+      <parameter name="RAY_STEPS" value="100" />
     </command>
 
     <command type="quad" tag="premarch" vs="raymarch" ps="raymarch" psdefines="PREMARCH" output="depth1">
@@ -34,6 +34,7 @@
     <command type="quad" tag="raymarch" vs="raymarch" ps="raymarch" psdefines="DEFERRED">
       <texture unit="depth" name="depth" />
       <texture unit="specular" name="depth1" />
+      <texture unit="normal" name="Textures/colormap.png" />
       <output index="0" name="viewport" />
       <output index="1" name="albedo" />
       <output index="2" name="normal" />

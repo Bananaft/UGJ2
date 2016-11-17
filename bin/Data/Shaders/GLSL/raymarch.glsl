@@ -36,7 +36,20 @@ void VS()
 }
 
 
+float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
+{
+	float res = 1.0;
+    float t = mint;
+    for( int i=0; i<16; i++ )
+    {
+		float h = sdfmap( ro + rd*t ).w;
+        res = min( res, 8.0*h/t );
+        t += clamp( h, 0.02, 0.10 );
+        if( h<0.001 || t>tmax ) break;
+    }
+    return clamp( res, 0.0, 1.0 );
 
+}
 
 
 void PS()
@@ -68,7 +81,7 @@ void PS()
        #ifdef PREMARCH
           distTrsh = pxsz * totalDistance * 1.4142;
           if(distance.w <= distTrsh || totalDistance >= cFarClipPS) break;
-          totalDistance += distTrsh * 0.5;
+          totalDistance += distTrsh * 0.8;
         #else
           if(distance.w <= 0.002 || totalDistance >= cFarClipPS) break;
        #endif
@@ -92,30 +105,21 @@ void PS()
 
       if (fdepth>depth) discard;
 
-      vec3 col = vec3(1.0);
+      vec3 col = texture2D(sNormalMap, vec2(0.5+0.02*(fract(intersection.x*2.12)+fract(intersection.z*1.89)),intersection.y*0.02)).rgb;
 
-      float shad = 0.2;
-      vec3 lightVec = vec3(0.3,-0.4,0.2);
+      vec3 lightVec = normalize(vec3(0.3,0.1,0.2));
+      float shad = softshadow(intersection, lightVec, 0.1,60.);
 
-      for (int i=0; i<6; i++)
-      {
-        intersection += lightVec * shad;
-        distance = sdfmap(intersection);
-        shad += distance.w;
-      }
+      col*=0.1 + shad;
 
-      shad = max(1.-(shad*0.6),0.);
-
-      col*=shad;
-
-      float fog = min(pow(fdepth * 6.,0.5),1.);//
+      float fog = min(pow(totalDistance/cFarClipPS,0.6),1.);//
   #endif
 
 
 
   //gl_FragColor = vec4(ambient , 1.0);
   #ifndef PREMARCH
-    gl_FragData[0] = vec4(mix(col,vec3(0.),fog),0.);//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
+    gl_FragData[0] = vec4(mix(col,vec3(0.8),fog),0.);//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
     gl_FragData[1] = vec4(0.5);
     //gl_FragData[0] = vec4(float(stps)/256,0.,0.,0.);//vec4(float(stps)/cRAY_STEPS,0.,0.,0.);//vec4(mimus , plus,0.,0.); //vec4(vec3(0.3) * (1.-fog),1.0);
     //gl_FragData[1] = vec4(0.);//vec4(diffColor.rgb * fog, 1.7 );

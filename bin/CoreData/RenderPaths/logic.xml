@@ -1,0 +1,5 @@
+<renderpath>
+  <command type="quad" tag="collisions" vs="collisions" ps="collisions">
+    <parameter name="RAY_STEPS" value="30" />
+  </command>
+</renderpath>
