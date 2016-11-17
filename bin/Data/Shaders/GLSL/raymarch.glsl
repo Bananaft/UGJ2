@@ -15,6 +15,7 @@ varying mat4 cViewProjPS;
 varying float fov;
 varying vec3 FrustumSizePS;
 varying mat4 ViewPS;
+varying float vtime;
 
 
 void VS()
@@ -31,20 +32,21 @@ void VS()
     fov = atan(cFrustumSize.y/cFrustumSize.z);
     FrustumSizePS = cFrustumSize;
     ViewPS = cView;
+    vtime = cElapsedTime;
     //direction = normalize(mat3(cView) * pos3);
 
 }
 
 
-float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
+float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax ,float vtime)
 {
 	float res = 1.0;
     float t = mint;
-    for( int i=0; i<16; i++ )
+    for( int i=0; i<8; i++ )
     {
-		float h = sdfmap( ro + rd*t ).w;
-        res = min( res, 8.0*h/t );
-        t += clamp( h, 0.02, 0.10 );
+		float h = sdfmap( ro + rd*t ,vtime).w;
+        res = min( res, 3.0*h/t );
+        t += clamp( h, 0.02, 20. );
         if( h<0.001 || t>tmax ) break;
     }
     return clamp( res, 0.0, 1.0 );
@@ -76,7 +78,7 @@ void PS()
    {
        intersection = origin + direction * totalDistance;
 
-       distance = sdfmap(intersection);
+       distance = sdfmap(intersection, vtime);
       totalDistance += distance.w;
        #ifdef PREMARCH
           distTrsh = pxsz * totalDistance * 1.4142;
@@ -107,8 +109,8 @@ void PS()
 
       vec3 col = texture2D(sNormalMap, vec2(0.5+0.02*(fract(intersection.x*2.12)+fract(intersection.z*1.89)),intersection.y*0.02)).rgb;
 
-      vec3 lightVec = normalize(vec3(0.3,0.1,0.2));
-      float shad = softshadow(intersection, lightVec, 0.1,60.);
+      vec3 lightVec = normalize(vec3(0.3,0.4,0.2));
+      float shad = softshadow(intersection, lightVec, 0.1,250., vtime);
 
       col*=0.1 + shad;
 

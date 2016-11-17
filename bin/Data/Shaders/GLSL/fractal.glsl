@@ -2,7 +2,7 @@ float hash(float h) {
 	return fract(sin(h) * 43758.5453123);
 }
 
-float noise(vec3 x) {
+float noise3d(vec3 x) {
 	vec3 p = floor(x);
 	vec3 f = fract(x);
 	f = f * f * (3.0 - 2.0 * f);
@@ -15,12 +15,44 @@ float noise(vec3 x) {
 					mix(hash(n + 270.0), hash(n + 271.0), f.x), f.y), f.z);
 }
 
-vec4 sdfmap(vec3 pos)
+float apo(vec3 pos)
+{
+  float dist;
+  vec3 CSize = vec3(1., 1., 1.3);
+  vec3 p = pos.xzy;
+  float scale = 1.0;
+
+  float r2 = 0.;
+  float k = 0.;
+  float uggg = 0.;
+  for( int i=0; i < 9;i++ )
+  {
+      p = 2.0*clamp(p, -CSize, CSize) - p;
+      r2 = dot(p,p);
+      //float r2 = dot(p,p+sin(p.z*.3)); //Alternate fractal
+      k = max((2.0)/(r2), .0274); //.378888 //.13345 max((2.6)/(r2), .03211); //max((1.8)/(r2), .0018);
+      p     *= k;
+      scale *= k;
+      uggg += r2;
+  }
+  float l = length(p.xy);
+  float rxy = l - 4.0;
+  float n = 1.0 * p.z;
+  rxy = max(rxy, -(n) / 4.);
+  dist = (rxy) / abs(scale);
+  return dist;
+}
+
+vec4 sdfmap(vec3 pos,float vtime)
 {
   float dist = 10000.;
-  float noise = noise(pos * 0.1) * 10.;
-
+  vec3 npos = pos;
+  npos.y += vtime;
+  npos.xz *= 0.6;
+  float noise = noise3d(npos * 0.1) * 10.;
+  float apodist = 0.1 * (7+pos.y) - apo(pos * 0.5) * 2.;
   dist = 0.2  * pos.y + noise;
+  dist = min(noise-apodist,dist+apodist);
 
   return vec4(0.,0.,0.,dist);
 }
