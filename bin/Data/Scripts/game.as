@@ -4,12 +4,16 @@ Node@ camNode;
 IntVector2 gres = IntVector2(640,360);
 
 Viewport@ rttViewport;
+Viewport@ logVpt;
 RenderSurface@ surface;
 Texture2D@ renderTexture;
 Texture2D@ logTex;
 Vector3 camVel = Vector3(0.,0.,0.);
 
 RenderPath@ renderpath;
+bool bmenu = false;
+bool blvl = false;
+int ilvl = 0;
 
 float yaw = 0.0f; // Camera ya
 
@@ -30,6 +34,7 @@ void Start()
 void setupTitle()
 {
 	
+
 	Node@ inroNode = scene_.CreateChild("intNode");
 	intro@ introObj = cast<intro>(inroNode.CreateScriptObject(scriptFile, "intro"));
     introObj.Init();
@@ -37,13 +42,19 @@ void setupTitle()
 
 void setupMenu()
 {
-	
+	ui.Clear();
+		
 	Node@ menuNode = scene_.CreateChild("menuNode");
 	menu@ menuObj = cast<menu>(menuNode.CreateScriptObject(scriptFile, "menu"));
     menuObj.Init();
 }
 
-void setupLevel()
+void startLevel(int lvl)
+{
+	setupLevel(lvl);
+}
+
+void setupLevel(int lvl)
 {
 	
 
@@ -90,9 +101,6 @@ void setupLevel()
     rttViewport = Viewport(scene_, camNode.GetComponent("Camera"));
 	rttViewport.rect = IntRect(0,0,gres.x,gres.y);
 	
-	RenderPath@ rndpth = rttViewport.renderPath.Clone();
-	rndpth.Load(cache.GetResource("XMLFile","RenderPaths/Deferred.xml"));
-	rttViewport.renderPath = rndpth;
 	
 	surface.viewports[0] = rttViewport;
     surface.updateMode = SURFACE_UPDATEALWAYS;
@@ -102,11 +110,24 @@ void setupLevel()
     logTex.filterMode = FILTER_NEAREST;
 	
 	RenderSurface@ surface2 = logTex.renderSurface;
-    Viewport@ logVpt = Viewport(scene_, camNode.GetComponent("Camera"));
+    logVpt = Viewport(scene_, camNode.GetComponent("Camera"));
 	logVpt.rect = IntRect(0,0,1,1);
 	
+	RenderPath@ rndpth = rttViewport.renderPath.Clone();
 	RenderPath@ rndpth2 = logVpt.renderPath.Clone();
-	rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+	
+	if (lvl == 1)
+	{
+		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv1.xml"));
+		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+	} else if (lvl == 2) {
+		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv2.xml"));
+		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+		
+	}
+		
+	rttViewport.renderPath = rndpth;
+	
 	logVpt.renderPath = rndpth2;
 	
 	surface2.viewports[0] = logVpt;
@@ -170,7 +191,17 @@ void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 	
 void HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
-
+	if (bmenu){
+		scene_.RemoveAllChildren();
+		setupMenu();
+		bmenu = false;
+	}
+	
+	if (blvl){
+		scene_.RemoveAllChildren();
+		startLevel(ilvl);
+		blvl = false;
+	}
 }
 	
 void HandleKeyDown(StringHash eventType, VariantMap& eventData)
@@ -181,9 +212,8 @@ void HandleKeyDown(StringHash eventType, VariantMap& eventData)
     // Close console (if open) or exit when ESC is pressed
     if (key == KEY_ESCAPE)
     {
-        if (!console.visible)
-            engine.Exit();
-        else
+        if (console.visible)
+
             console.visible = false;
     }
 
@@ -304,6 +334,13 @@ void Update(float timeStep)
         //Terrain@ terr = scene.GetChild("terrain").GetComponent("terrain");
         //float ter_height = terr.GetHeight(campos) + 0.9;
         //if (campos.y<ter_height) node.position = Vector3(campos.x, ter_height, campos.z);
+		
+		if (input.keyPress[KEY_ESCAPE])
+		{
+			bmenu = true;
+			self.Remove();
+			node.Remove();
+		}
     }
 
 
@@ -387,6 +424,7 @@ class intro : ScriptObject
 		{
 			ui.Clear();
 			setupMenu();
+			self.Remove();
 			node.Remove();
 		}
 		
@@ -399,7 +437,11 @@ class menu : ScriptObject
 	Sprite@ lv1;
 	Sprite@ lv2;
 	
+	Vector2 lv1pos = Vector2(-400,0.);
+	Vector2 lv2pos = Vector2(400,0.);
+	
 	Sprite@ cur;
+	bool noext = false;
 	
 	void Init()
     {
@@ -410,7 +452,7 @@ class menu : ScriptObject
 		lv1.texture = lv1Tex;
 		lv1.size = IntVector2(256,256);
 		lv1.hotSpot = IntVector2(128, 128);
-		lv1.position = Vector2(-400,0.);
+		lv1.position = lv1pos;
 		lv1.verticalAlignment = VA_CENTER;
 		lv1.horizontalAlignment = HA_CENTER;
 		
@@ -453,6 +495,34 @@ class menu : ScriptObject
 		if (cur.position.x < -graphics.width/2.1) cur.position += Vector2(-cur.position.x - graphics.width/2.1, 0 );
 		if (cur.position.y > graphics.height/2.1) cur.position -= Vector2(0., cur.position.y - graphics.height/2.1);
 		if (cur.position.y < -graphics.height/2.1) cur.position += Vector2(0., -cur.position.y - graphics.height/2.1);
+		
+		Vector2 lv1l = lv1.position - cur.position;
+		Vector2 lv2l = lv2.position - cur.position;
+		
+		if (lv1l.length<200)
+		{
+			lv1.position = lv1pos + (Vector2(10 * Sin(time.elapsedTime * 9000),10 * Sin(time.elapsedTime * 792.222)));
+			if (input.mouseButtonPress[MOUSEB_LEFT]){
+				ilvl = 1;
+				blvl = true;
+				self.Remove();
+			}
+			
+		} else lv1.position = lv1pos;
+		
+		if (lv2l.length<200)
+		{
+			lv2.position = lv2pos + (Vector2(10 * Sin(time.elapsedTime * 9000),10 * Sin(time.elapsedTime * 792.222)));
+			if (input.mouseButtonPress[MOUSEB_LEFT]){
+				ilvl = 2;
+				blvl = true;
+				self.Remove();
+			}
+			
+		} else lv2.position = lv2pos;
+		
+		if (input.keyPress[KEY_ESCAPE] && noext) engine.Exit();
+		noext = true;
 	}
 	
 }
