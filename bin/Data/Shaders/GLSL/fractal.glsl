@@ -49,10 +49,11 @@ vec4 sdfmap(vec3 pos,float vtime)
   vec3 npos = pos;
   npos.y += vtime;
   npos.xz *= 0.6;
+	float ftime =  min(vtime * 0.01,1.);
   float noise = noise3d(npos * 0.1) * 10.;
-  float apodist = 0.1 * (7+pos.y) - apo(pos * 0.5) * 2.;
-  dist = 0.2  * pos.y + noise;
-  dist = min(noise-apodist,dist+apodist);
+  float apodist = 0.1 * (7+pos.y) - apo(pos * 0.5) * 2.  * ftime;
+  dist = 0.2  * pos.y + noise * pow(min(vtime * 0.05,1.),2.2);
+  dist = min(mix(pos.y,noise,ftime) -(apodist),dist+apodist);
 
   return vec4(0.,0.,0.,dist);
 }
