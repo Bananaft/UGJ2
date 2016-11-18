@@ -16,12 +16,37 @@ float yaw = 0.0f; // Camera ya
 void Start()
 {
 	cache.autoReloadResources = true;
+	scene_ = Scene();
 
-    scene_ = Scene();
 	CreateConsoleAndDebugHud();
 
 	SubscribeToEvent("KeyDown", "HandleKeyDown");
-	 SubscribeToEvent("Update", "HandleUpdate");
+	SubscribeToEvent("Update", "HandleUpdate");
+	
+	setupTitle();
+	
+}
+
+void setupTitle()
+{
+	
+	Node@ inroNode = scene_.CreateChild("intNode");
+	intro@ introObj = cast<intro>(inroNode.CreateScriptObject(scriptFile, "intro"));
+    introObj.Init();
+}
+
+void setupMenu()
+{
+	
+	Node@ menuNode = scene_.CreateChild("menuNode");
+	menu@ menuObj = cast<menu>(menuNode.CreateScriptObject(scriptFile, "menu"));
+    menuObj.Init();
+}
+
+void setupLevel()
+{
+	
+
 	
   //SCENE
 	scene_.CreateComponent("Octree");
@@ -118,7 +143,6 @@ void Start()
 					"Hello! \n"
 					"F2 - show profiler \n"
 					"F12 - take screenshot \n\n";
-	
 }
 
 void CreateConsoleAndDebugHud()
@@ -284,4 +308,151 @@ void Update(float timeStep)
 
 
 
+}
+
+class intro : ScriptObject
+{
+	Sprite@ splash;
+	Sprite@ splash2;
+	Sprite@ story;
+	
+	void Init()
+    {
+		Texture2D@ splashTex = cache.GetResource("Texture2D", "Textures/teamlogo.png");
+
+
+		splash = Sprite();
+		splash.texture = splashTex;
+		splash.size = IntVector2(256,256);
+		splash.hotSpot = IntVector2(128, 128);
+		splash.verticalAlignment = VA_CENTER;
+		splash.horizontalAlignment = HA_CENTER;
+		ui.root.AddChild(splash);
+		splash.opacity = 0.;
+		
+		Texture2D@ splashTex2 = cache.GetResource("Texture2D", "Textures/sndpls.png");
+		splashTex2.filterMode = FILTER_NEAREST;
+
+		splash2 = Sprite();
+		splash2.texture = splashTex2;
+		splash2.size = IntVector2(512,512);
+		splash2.hotSpot = IntVector2(256, 256);
+		splash2.verticalAlignment = VA_CENTER;
+		splash2.horizontalAlignment = HA_CENTER;
+		ui.root.AddChild(splash2);
+		splash2.opacity = 0.;
+		
+		Texture2D@ storyTex = cache.GetResource("Texture2D", "Textures/story.png");
+		storyTex.filterMode = FILTER_NEAREST;
+
+		story = Sprite();
+		story.texture = storyTex;
+		story.size = IntVector2(256 * 4,1024 * 4);
+		story.hotSpot = IntVector2(512, 0);
+		story.verticalAlignment = VA_CENTER;
+		story.horizontalAlignment = HA_CENTER;
+		ui.root.AddChild(story);
+		story.opacity = 0.;
+	}
+	
+	void Update(float timeStep)
+	{
+		if (1.<time.elapsedTime && time.elapsedTime<2.)
+		{
+			splash.opacity = time.elapsedTime-1.;
+		} else if (time.elapsedTime>3.)
+		{
+			splash.opacity = 1.-(time.elapsedTime-3.);
+		} 
+		
+		if (4.<time.elapsedTime && time.elapsedTime<5.)
+		{
+			splash2.opacity = time.elapsedTime-4.;
+		} else if (time.elapsedTime>6.)
+		{
+			splash2.opacity = 1.-(time.elapsedTime-6.);
+		} 
+		
+		if (7.<time.elapsedTime && time.elapsedTime<8.)
+		{
+			story.opacity = time.elapsedTime-7.;
+		}
+				
+		if (7.<time.elapsedTime)
+		{
+			story.position = Vector2(0. , story.position.y - 25.*timeStep);
+		}
+		
+		if (input.keyPress[KEY_SPACE] || input.mouseButtonPress[MOUSEB_LEFT])
+		{
+			ui.Clear();
+			setupMenu();
+			node.Remove();
+		}
+		
+	}
+
+}
+
+class menu : ScriptObject
+{	
+	Sprite@ lv1;
+	Sprite@ lv2;
+	
+	Sprite@ cur;
+	
+	void Init()
+    {
+		Texture2D@ lv1Tex = cache.GetResource("Texture2D", "Textures/lv1.png");
+		lv1Tex.filterMode = FILTER_NEAREST;
+
+		lv1 = Sprite();
+		lv1.texture = lv1Tex;
+		lv1.size = IntVector2(256,256);
+		lv1.hotSpot = IntVector2(128, 128);
+		lv1.position = Vector2(-400,0.);
+		lv1.verticalAlignment = VA_CENTER;
+		lv1.horizontalAlignment = HA_CENTER;
+		
+		ui.root.AddChild(lv1);
+		
+		Texture2D@ lv2Tex = cache.GetResource("Texture2D", "Textures/lv2.png");
+		lv2Tex.filterMode = FILTER_NEAREST;
+
+		lv2 = Sprite();
+		lv2.texture = lv2Tex;
+		lv2.size = IntVector2(256,256);
+		lv2.hotSpot = IntVector2(128, 128);
+		lv2.position = Vector2(400,0.);
+		lv2.verticalAlignment = VA_CENTER;
+		lv2.horizontalAlignment = HA_CENTER;
+		
+		ui.root.AddChild(lv2);
+		
+		Texture2D@ curTex = cache.GetResource("Texture2D", "Textures/cur.png");
+		
+
+		cur = Sprite();
+		cur.texture = curTex;
+		cur.size = IntVector2(64,64);
+		//cur.hotSpot = IntVector2(128, 128);
+		
+		cur.verticalAlignment = VA_CENTER;
+		cur.horizontalAlignment = HA_CENTER;
+		cur.opacity = 0.99;
+		ui.root.AddChild(cur);
+		
+	}
+	
+	void Update(float timeStep)
+	{
+		IntVector2 mouseMove = input.mouseMove;
+		cur.position += Vector2(mouseMove.x,mouseMove.y);
+		
+		if (cur.position.x > graphics.width/2.1) cur.position -= Vector2(cur.position.x - graphics.width/2.1, 0 );
+		if (cur.position.x < -graphics.width/2.1) cur.position += Vector2(-cur.position.x - graphics.width/2.1, 0 );
+		if (cur.position.y > graphics.height/2.1) cur.position -= Vector2(0., cur.position.y - graphics.height/2.1);
+		if (cur.position.y < -graphics.height/2.1) cur.position += Vector2(0., -cur.position.y - graphics.height/2.1);
+	}
+	
 }
