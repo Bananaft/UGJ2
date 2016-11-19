@@ -1,3 +1,6 @@
+uniform float cANIM;
+uniform float cPHASE;
+
 float hash(float h) {
 	return fract(sin(h) * 43758.5453123);
 }
@@ -50,9 +53,9 @@ vec3 pointRepetition(vec3 point, vec3 c)
 	return point;
 }
 
-vec4 sdfmap(vec3 pos,float vtime)
+float sdfmap(vec3 pos)
 {
-	vtime = 60.;
+	float vtime = cANIM;
 	float dist = 10000.;
   vec3 npos = pos;
   npos.y += vtime;
@@ -66,5 +69,5 @@ vec4 sdfmap(vec3 pos,float vtime)
   dist = 0.2  * pos.y + noise * pow(min(vtime * 0.05,1.),2.2);
   dist = min(mix(pos.y,noise,ftime) -(apodist),dist+apodist);
 
-  return vec4(0.,0.,0.,dist);
+  return dist;
 }

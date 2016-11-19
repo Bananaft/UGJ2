@@ -12,12 +12,14 @@ Texture2D@ logTex;
 
 Vector3 camVel = Vector3(0.,0.,0.);
 
-RenderPath@ renderpath;
+
 bool bmenu = false;
 bool blvl = false;
 int ilvl = 0;
 int dlbtogo;
 int lvlphase;
+float worldPhase = 0.;
+float worldAnim = 0.;
 
 float yaw = 0.0f; // Camera ya
 
@@ -137,6 +139,7 @@ void setupLevel(int lvl)
 		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
 		
 	}
+	//rndpth.shaderParameters["ANIM"] = Variant(500.);
 		
 	rttViewport.renderPath = rndpth;
 	logVpt.renderPath = rndpth2;
@@ -198,6 +201,46 @@ void spawnDolboshka(Vector3 pos, float spd)
 	dlb.speed = spd;
 	dlb.Init();
 }
+
+void updateWorld (float wphase, float wanim)
+{
+	RenderPath@ renderpath = rttViewport.renderPath.Clone();
+	RenderPathCommand rpc;
+	renderpath.shaderParameters["ANIM"] = wanim;
+	renderpath.shaderParameters["PHASE"] = wphase;
+	rttViewport.renderPath = renderpath;
+	
+	renderpath = logVpt.renderPath.Clone();
+	
+	renderpath.shaderParameters["ANIM"] = wanim;
+	renderpath.shaderParameters["PHASE"] = wphase;
+
+	logVpt.renderPath = renderpath;
+}
+
+/*void setWorld (float wphase, float wanim)
+{
+	RenderPath@ renderpath = rttViewport.renderPath.Clone();
+	RenderPathCommand rpc;
+	
+	for (int i=3; i<6; i++)
+	{
+		rpc = renderpath.commands[i];
+		//rpc.pixelShaderDefines = "PREMARCH FCTYP";
+		renderpath.commands[i] = rpc;
+	}
+	rpc = renderpath.commands[6];
+	//rpc.pixelShaderDefines = "DEFERRED FCTYP";
+	renderpath.commands[6] = rpc;
+	rttViewport.renderPath = renderpath;
+	
+	renderpath = logVpt.renderPath.Clone();
+	
+	rpc = renderpath.commands[1];
+	//rpc.pixelShaderDefines = "DEFERRED FCTYP";
+	renderpath.commands[1] = rpc;
+	logVpt.renderPath = renderpath;
+}*/
 
 void switchPhase()
 {
@@ -483,6 +526,10 @@ class dolboshka : ScriptObject
 			rotded.FromEulerAngles(Sin(phase)*360 * timeStep,Sin(bhvr.x * 20.)*360 * timeStep,Sin(bhvr.y * 20.)*360 * timeStep);
 			node.Rotate(rotded);
 			dedtmr -= timeStep;
+			
+			worldAnim += 30. * timeStep;
+			updateWorld(worldAnim,worldAnim);
+			
 			if (dedtmr<0.)
 			{
 				node.Remove();

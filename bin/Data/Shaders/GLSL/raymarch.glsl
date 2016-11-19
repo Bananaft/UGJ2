@@ -15,7 +15,7 @@ varying mat4 cViewProjPS;
 varying float fov;
 varying vec3 FrustumSizePS;
 varying mat4 ViewPS;
-varying float vtime;
+
 
 
 void VS()
@@ -32,19 +32,18 @@ void VS()
     fov = atan(cFrustumSize.y/cFrustumSize.z);
     FrustumSizePS = cFrustumSize;
     ViewPS = cView;
-    vtime = cElapsedTime;
-    //direction = normalize(mat3(cView) * pos3);
+
 
 }
 
 
-float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax ,float vtime)
+float softshadow( in vec3 ro, in vec3 rd, in float mint, in float tmax )
 {
 	float res = 1.0;
     float t = mint;
     for( int i=0; i<8; i++ )
     {
-		float h = sdfmap( ro + rd*t ,vtime).w;
+		float h = sdfmap( ro + rd*t );
         res = min( res, 3.0*h/t );
         t += clamp( h, 0.02, 20. );
         if( h<0.001 || t>tmax ) break;
@@ -64,7 +63,7 @@ void PS()
   //vec3 direction = camMat * normalize( vec3(uv.xy,2.0) );
   float PREdepth =  texture2D(sSpecMap, vScreenPos).r;
 
-  vec4 distance = vec4(0.);
+  float distance = 0.;
   float totalDistance = PREdepth;// * cFarClipPS;
   float lfog = 0.;
   float pxsz = fov * cGBufferInvSize.y;
@@ -77,14 +76,14 @@ void PS()
    {
        intersection = origin + direction * totalDistance;
 
-       distance = sdfmap(intersection, vtime);
-      totalDistance += distance.w;
+       distance = sdfmap(intersection);
+      totalDistance += distance;
        #ifdef PREMARCH
           distTrsh = pxsz * totalDistance * 1.4142;
-          if(distance.w <= distTrsh || totalDistance >= cFarClipPS) break;
+          if(distance <= distTrsh || totalDistance >= cFarClipPS) break;
           totalDistance += distTrsh * 0.8;
         #else
-          if(distance.w <= 0.002 || totalDistance >= cFarClipPS) break;
+          if(distance <= 0.002 || totalDistance >= cFarClipPS) break;
        #endif
 
 
@@ -109,7 +108,7 @@ void PS()
       vec3 col = texture2D(sNormalMap, vec2(0.5+0.02*(fract(intersection.x*2.12)+fract(intersection.z*1.89)),intersection.y*0.02)).rgb;
 
       vec3 lightVec = normalize(vec3(0.3,0.4,0.2));
-      float shad = softshadow(intersection, lightVec, 0.1,250., vtime);
+      float shad = softshadow(intersection, lightVec, 0.1,250.);
 
       col*=0.1 + shad;
 
