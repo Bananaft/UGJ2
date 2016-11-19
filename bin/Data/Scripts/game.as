@@ -5,17 +5,19 @@ IntVector2 gres = IntVector2(640,360);
 
 Viewport@ rttViewport;
 Viewport@ logVpt;
-Viewport@ enmVpt;
+
 RenderSurface@ surface;
 Texture2D@ renderTexture;
 Texture2D@ logTex;
-Texture2D@ enmTex;
+
 Vector3 camVel = Vector3(0.,0.,0.);
 
 RenderPath@ renderpath;
 bool bmenu = false;
 bool blvl = false;
 int ilvl = 0;
+int dlbtogo;
+int lvlphase;
 
 float yaw = 0.0f; // Camera ya
 
@@ -68,7 +70,7 @@ void setupLevel(int lvl)
 	
 	
 //	renderer.hdrRendering = true;
-	camVel = Vector3(0.,0.,0.);
+	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
     Zone@ zone = zoneNode.CreateComponent("Zone");
@@ -78,14 +80,15 @@ void setupLevel(int lvl)
 	
 	camNode = scene_.CreateChild("CamNode");
 	Camera@ camera = camNode.CreateComponent("Camera");
-	camNode.position = Vector3(10,20,-30);
+	camNode.position = Vector3(0,50,-230);
 	camera.farClip = 200;
 	jetpack@ flcam = cast<jetpack>(camNode.CreateScriptObject(scriptFile, "jetpack"));
     flcam.Init();
 	
-	Node@ fakeboxNode = scene_.CreateChild("Plane");
-	StaticModel@ fakeboxObject = fakeboxNode.CreateComponent("StaticModel");
-	fakeboxObject.model = cache.GetResource("Model", "Models/Sphere.mdl");
+	//Node@ fakeboxNode = scene_.CreateChild("Plane");
+	//StaticModel@ fakeboxObject = fakeboxNode.CreateComponent("StaticModel");
+	//fakeboxObject.model = cache.GetResource("Model", "Models/Sphere.mdl");
+	//fakeboxNode.scale = Vector3(1.,1.,1.);
 	
 	/*Viewport@ mainVP = Viewport(scene_, camera);
 	renderer.viewports[0] = mainVP;
@@ -119,17 +122,8 @@ void setupLevel(int lvl)
     logVpt = Viewport(scene_, camNode.GetComponent("Camera"));
 	logVpt.rect = IntRect(0,0,1,1);
 	
-	enmTex = Texture2D();
-    enmTex.SetSize(16, 16, GetRGBAFormat(), TEXTURE_RENDERTARGET);
-    enmTex.filterMode = FILTER_NEAREST;
-	
-	RenderSurface@ surface3 = enmTex.renderSurface;
-    enmVpt = Viewport(scene_, camNode.GetComponent("Camera"));
-	enmVpt.rect = IntRect(0,0,1,1);
-	
 	RenderPath@ rndpth = rttViewport.renderPath.Clone();
 	RenderPath@ rndpth2 = logVpt.renderPath.Clone();
-	RenderPath@ rndpth3 = enmVpt.renderPath.Clone();
 	
 	
 	
@@ -137,7 +131,7 @@ void setupLevel(int lvl)
 	{
 		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv1.xml"));
 		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
-		rndpth3.Load(cache.GetResource("XMLFile","RenderPaths/enm1.xml"));
+
 	} else if (lvl == 2) {
 		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv2.xml"));
 		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
@@ -146,13 +140,11 @@ void setupLevel(int lvl)
 		
 	rttViewport.renderPath = rndpth;
 	logVpt.renderPath = rndpth2;
-	enmVpt.renderPath = rndpth3;
+
 	
 	surface2.viewports[0] = logVpt;
     surface2.updateMode = SURFACE_UPDATEALWAYS;
 	
-	surface3.viewports[0] = enmVpt;
-    surface3.updateMode = SURFACE_UPDATEALWAYS;
 	
 	Sprite@ screen = Sprite();
 	screen.texture = renderTexture;
@@ -184,6 +176,51 @@ void setupLevel(int lvl)
 					"Hello! \n"
 					"F2 - show profiler \n"
 					"F12 - take screenshot \n\n";
+					
+	
+	spawnDolboshka(Vector3(0.,1.,0.),0.);
+	dlbtogo = 1;
+	lvlphase = 1;
+		
+	
+
+}
+
+void spawnDolboshka(Vector3 pos, float spd)
+{
+	Node@ dlbnNode = scene_.CreateChild("dlbNode");
+	dlbnNode.position = pos;
+	dolboshka@ dlb = cast<dolboshka>(dlbnNode.CreateScriptObject(scriptFile, "dolboshka"));
+	StaticModel@ dlbmodel = dlbnNode.CreateComponent("StaticModel");
+	dlbmodel.model = cache.GetResource("Model", "Models/Teapot.mdl");
+	dlbnNode.scale = Vector3(5.,1.,5.);
+	dlb.alt = pos.y;
+	dlb.speed = spd;
+	dlb.Init();
+}
+
+void switchPhase()
+{
+	Vector3 cpos = camNode.position;
+	cpos.y = 0.;
+	
+	if (ilvl == 1)
+	{
+		if (lvlphase == 2)
+		{
+			spawnDolboshka(cpos + Vector3(50.,1.,0.),5.);
+			spawnDolboshka(cpos + Vector3(-50.,1.,0.),5.);
+			dlbtogo = 2;
+		}
+		
+		if (lvlphase == 3)
+		{
+			spawnDolboshka(cpos + Vector3(50.,1.,0.),17.);
+			spawnDolboshka(cpos + Vector3(-50.,1.,0.),17.);
+			spawnDolboshka(cpos + Vector3(0.,1.,50.),17.);
+			dlbtogo = 3;
+		}
+	}
 }
 
 void CreateConsoleAndDebugHud()
@@ -317,8 +354,6 @@ void Update(float timeStep)
 		Vector3 normal = Vector3(px.r,px.g,px.b);
 		float dist = px.a;
 		
-		Image@ enmimg = enmTex.GetImage();
-		
 	
 		camVel.y -= 9.8 * time.timeStep;
 		camNode.position += camVel * time.timeStep;
@@ -399,16 +434,94 @@ void Update(float timeStep)
 
 class dolboshka : ScriptObject
 {
+	float alt;
+	float speed = 10;
+	float phase = 0.;
+	Vector2 bhvr;
+	
+	Vector2 vel;
+	
+	bool ded = false;
+	float dedtmr = 1;
+	
 	void Init()
     {
 		
-        
+        bhvr = Vector2(10 + Random(50),10 + Random(50));
     }
 	
 	void Update(float timeStep)
     {
+		node.position = Vector3(node.position.x,alt,node.position.z);
 		
-        
+		
+		
+		
+		Vector3 toCam = camNode.position - node.position;
+		Vector2 heading = Vector2(toCam.x,toCam.z);
+		heading.Normalize();
+		float range = toCam.length;
+
+		
+		if (range<4.)
+		{
+			ded = true;
+			dlbtogo--;
+			
+			if (dlbtogo == 0)
+			{
+				lvlphase++;
+				switchPhase();
+			}
+		}
+		
+		if(ded)
+		{
+			node.position += Vector3(vel.x * timeStep + camVel.x * 2 *timeStep,camVel.y * 2 *timeStep,vel.y * timeStep + camVel.z * 2 *timeStep);
+			vel *= 0.95;
+			Quaternion rotded;
+			rotded.FromEulerAngles(Sin(phase)*360 * timeStep,Sin(bhvr.x * 20.)*360 * timeStep,Sin(bhvr.y * 20.)*360 * timeStep);
+			node.Rotate(rotded);
+			dedtmr -= timeStep;
+			if (dedtmr<0.)
+			{
+				node.Remove();
+			}
+		} else {
+			
+			if (range<20)
+			{
+				heading *= -1;
+				phase = Random(360);
+			}
+			else if (range<100)
+			{
+				heading = Vector2(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.x * time.elapsedTime+phase));
+			}
+			
+			vel += heading * 0.2;
+			
+			if (vel.length > speed)
+			{
+				vel.Normalize();
+				vel *= speed;
+			}
+			
+			if (range>150)
+			{
+				vel = heading * 200.;
+			}
+			
+			node.position += Vector3(vel.x * timeStep,0.,vel.y * timeStep);
+			
+			Quaternion rot;
+			rot.FromEulerAngles(0.,90.*timeStep,0.);
+			node.Rotate(rot);
+			
+		}
+		
+		
+		
     }
 }
 

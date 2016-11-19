@@ -19,16 +19,22 @@
 
     <command type="quad" tag="premarch" vs="raymarch" ps="raymarch" psdefines="PREMARCH" output="depth3">
         <parameter name="RAY_STEPS" value="60" />
+        <parameter name="ANIM" value="0" />
+        <parameter name="PHASE" value="0" />
     </command>
 
     <command type="quad" tag="premarch" vs="raymarch" ps="raymarch" psdefines="PREMARCH" output="depth2">
       <texture unit="specular" name="depth3" />
       <parameter name="RAY_STEPS" value="100" />
+      <parameter name="ANIM" value="0" />
+      <parameter name="PHASE" value="0" />
     </command>
 
     <command type="quad" tag="premarch" vs="raymarch" ps="raymarch" psdefines="PREMARCH" output="depth1">
       <texture unit="specular" name="depth2" />
       <parameter name="RAY_STEPS" value="60" />
+      <parameter name="ANIM" value="0" />
+      <parameter name="PHASE" value="0" />
     </command>
 
     <command type="quad" tag="raymarch" vs="raymarch" ps="raymarch" psdefines="DEFERRED">
@@ -40,6 +46,8 @@
       <output index="2" name="normal" />
       <output index="3" name="depth" />
       <parameter name="RAY_STEPS" value="30" />
+      <parameter name="ANIM" value="0" />
+      <parameter name="PHASE" value="0" />
     </command>
 
     <command type="lightvolumes" vs="DeferredLight" ps="DeferredLight" >

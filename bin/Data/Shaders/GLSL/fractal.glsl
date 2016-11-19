@@ -52,7 +52,7 @@ vec3 pointRepetition(vec3 point, vec3 c)
 
 vec4 sdfmap(vec3 pos,float vtime)
 {
-	//vtime = 2000.;
+	vtime = 60.;
 	float dist = 10000.;
   vec3 npos = pos;
   npos.y += vtime;

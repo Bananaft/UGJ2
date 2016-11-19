@@ -73,7 +73,6 @@ void PS()
   float distTrsh = 0.002;
   int stps = 0;
 
-
   for(int i =0 ;  i < cRAY_STEPS; ++i) ////// Rendering main scene
    {
        intersection = origin + direction * totalDistance;
@@ -115,6 +114,12 @@ void PS()
       col*=0.1 + shad;
 
       float fog = min(pow(totalDistance/cFarClipPS,0.6),1.);//
+
+      if (totalDistance<0.1){
+         col *= vec3(1.0,0.2,0.2);
+         fog = 0.;
+       }
+
   #endif
 
 
