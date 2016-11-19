@@ -43,15 +43,26 @@ float apo(vec3 pos)
   return dist;
 }
 
+vec3 pointRepetition(vec3 point, vec3 c)
+{
+	point.x = mod(point.x, c.x) - 0.5*c.x;
+	point.z = mod(point.z, c.z) - 0.5*c.z;
+	return point;
+}
+
 vec4 sdfmap(vec3 pos,float vtime)
 {
-  float dist = 10000.;
+	//vtime = 2000.;
+	float dist = 10000.;
   vec3 npos = pos;
   npos.y += vtime;
   npos.xz *= 0.6;
 	float ftime =  min(vtime * 0.01,1.);
   float noise = noise3d(npos * 0.1) * 10.;
-  float apodist = 0.1 * (7+pos.y) - apo(pos * 0.5) * 2.  * ftime;
+
+	vec3 apopos = pointRepetition(pos,vec3(500.,0,500.));
+
+  float apodist = 0.1 * (7+pos.y) - apo(apopos * 0.5) * 2.  * ftime;
   dist = 0.2  * pos.y + noise * pow(min(vtime * 0.05,1.),2.2);
   dist = min(mix(pos.y,noise,ftime) -(apodist),dist+apodist);
 

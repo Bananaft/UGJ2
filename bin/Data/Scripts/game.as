@@ -5,9 +5,11 @@ IntVector2 gres = IntVector2(640,360);
 
 Viewport@ rttViewport;
 Viewport@ logVpt;
+Viewport@ enmVpt;
 RenderSurface@ surface;
 Texture2D@ renderTexture;
 Texture2D@ logTex;
+Texture2D@ enmTex;
 Vector3 camVel = Vector3(0.,0.,0.);
 
 RenderPath@ renderpath;
@@ -21,6 +23,9 @@ void Start()
 {
 	cache.autoReloadResources = true;
 	scene_ = Scene();
+	
+	scene_.CreateComponent("Octree");
+//	scene_.CreateComponent("PhysicsWorld"):
 
 	CreateConsoleAndDebugHud();
 
@@ -60,10 +65,11 @@ void setupLevel(int lvl)
 
 	
   //SCENE
-	scene_.CreateComponent("Octree");
+	
 	
 //	renderer.hdrRendering = true;
-	
+	camVel = Vector3(0.,0.,0.);
+
 	Node@ zoneNode = scene_.CreateChild("Zone");
     Zone@ zone = zoneNode.CreateComponent("Zone");
     zone.boundingBox = BoundingBox(-20000.0f, 20000.0f);
@@ -113,13 +119,25 @@ void setupLevel(int lvl)
     logVpt = Viewport(scene_, camNode.GetComponent("Camera"));
 	logVpt.rect = IntRect(0,0,1,1);
 	
+	enmTex = Texture2D();
+    enmTex.SetSize(16, 16, GetRGBAFormat(), TEXTURE_RENDERTARGET);
+    enmTex.filterMode = FILTER_NEAREST;
+	
+	RenderSurface@ surface3 = enmTex.renderSurface;
+    enmVpt = Viewport(scene_, camNode.GetComponent("Camera"));
+	enmVpt.rect = IntRect(0,0,1,1);
+	
 	RenderPath@ rndpth = rttViewport.renderPath.Clone();
 	RenderPath@ rndpth2 = logVpt.renderPath.Clone();
+	RenderPath@ rndpth3 = enmVpt.renderPath.Clone();
+	
+	
 	
 	if (lvl == 1)
 	{
 		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv1.xml"));
 		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+		rndpth3.Load(cache.GetResource("XMLFile","RenderPaths/enm1.xml"));
 	} else if (lvl == 2) {
 		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv2.xml"));
 		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
@@ -127,12 +145,14 @@ void setupLevel(int lvl)
 	}
 		
 	rttViewport.renderPath = rndpth;
-	
 	logVpt.renderPath = rndpth2;
+	enmVpt.renderPath = rndpth3;
 	
 	surface2.viewports[0] = logVpt;
     surface2.updateMode = SURFACE_UPDATEALWAYS;
 	
+	surface3.viewports[0] = enmVpt;
+    surface3.updateMode = SURFACE_UPDATEALWAYS;
 	
 	Sprite@ screen = Sprite();
 	screen.texture = renderTexture;
@@ -288,14 +308,18 @@ void Update(float timeStep)
 		{
 			
 		}
+		Quaternion trot; trot.FromEulerAngles(0.,node.rotation.yaw,0.);
 		thrust.Normalize();
-		camVel += node.rotation * thrust * time.timeStep * MOVE_SPEED;
+		camVel += trot * thrust * time.timeStep * MOVE_SPEED;
 
 		Image@ img =logTex.GetImage();
 		Color px = img.GetPixel(0,0);
 		Vector3 normal = Vector3(px.r,px.g,px.b);
 		float dist = px.a;
 		
+		Image@ enmimg = enmTex.GetImage();
+		
+	
 		camVel.y -= 9.8 * time.timeStep;
 		camNode.position += camVel * time.timeStep;
 		
@@ -305,12 +329,30 @@ void Update(float timeStep)
 			else camVel.y += 8. * time.timeStep;
 		}
 		
-		if (dist<0.4)
+		if (dist<0.7)
 		{
 			//camVel = normal * camVel.length * 0.8;
-			camVel.y = Max(camVel.y,0.);
-			camVel += normal * 40.  *  time.timeStep;
+			if (normal.y>0.3)camVel.y = Max(camVel.y,0.);
+			else if (normal.y<-0.3)camVel.y = Min(camVel.y,0.);
+			camVel += normal * 20.  *  time.timeStep;
 			//camVel.y += 2. * time.timeStep;
+			//float dot = camVel.DotProduct(normal);
+			//Vector3 refvec = normal*dot*2. - camVel;
+			//if (dot>0.2) camVel = refvec;
+			
+			if (dist<0.3)
+			{
+				float trs = 0.2;
+				if (normal.y>trs)camVel.y = Max(camVel.y,0.);
+				else if (normal.y<-trs)camVel.y = Min(camVel.y,0.);
+				
+				camVel += normal * 50.  *  time.timeStep;
+				/*if (normal.x>trs)camVel.x *= -1;// Max(camVel.x,0.);
+				else if (normal.x<-trs)camVel.x *= -1;// Min(camVel.x,0.);
+				
+				if (normal.z>trs)camVel.z *= -1;// Max(camVel.z,0.);
+				else if (normal.z<-trs)camVel.z *= -1;// Min(camVel.z,0.);*/
+			}
 			
 			
 		}
@@ -339,12 +381,35 @@ void Update(float timeStep)
 		{
 			bmenu = true;
 			self.Remove();
-			node.Remove();
+			//node.Remove();
 		}
+		
+		
+/*		Color px2;
+		for (uint i=0; i<32;i++)
+			for (uint u=0; u<32;u++){
+				px2 = img.GetPixel(i,u);
+				log.Info(String(i));
+			}	*/
     }
 
 
 
+}
+
+class dolboshka : ScriptObject
+{
+	void Init()
+    {
+		
+        
+    }
+	
+	void Update(float timeStep)
+    {
+		
+        
+    }
 }
 
 class intro : ScriptObject
@@ -425,7 +490,7 @@ class intro : ScriptObject
 			ui.Clear();
 			setupMenu();
 			self.Remove();
-			node.Remove();
+			
 		}
 		
 	}

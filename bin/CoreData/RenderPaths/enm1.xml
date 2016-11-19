@@ -1,0 +1,5 @@
+<renderpath>
+  <command type="quad" tag="enms" vs="enms" ps="enms">
+    <parameter name="RAY_STEPS" value="30" />
+  </command>
+</renderpath>
