@@ -31,8 +31,9 @@ void PS()
 	//vec4 heightmap = texture2D(sDiffMap, vTexCoord.xy);
 	vec3 diffColor = col.xyz;
   float y = vWorldPos.y;
-  vec3 glowCol = vec3(0.2+fract(y*0.3312 + cElapsedTimePS*2.),0.2+fract(y*0.977 + cElapsedTimePS*3.1),0.2+fract(y*1.137943 + cElapsedTimePS*3.33));
-  glowCol = normalize(glowCol) * 2.;
+  vec3 cls = mix(vec3(0.02,0.9,0.2),vec3(0.05,0.5,0.75),abs(2.*(fract(y*0.977 + cElapsedTimePS*0.8)-0.5)));
+  vec3 glowCol = cls * (0.8 + fract(y*2 + cElapsedTimePS*3.33));
+  //glowCol = normalize(glowCol) * 2.;
   //glowCol *= col.a;
 
 
