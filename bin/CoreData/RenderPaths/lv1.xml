@@ -41,6 +41,7 @@
       <texture unit="depth" name="depth" />
       <texture unit="specular" name="depth1" />
       <texture unit="normal" name="Textures/colormap.png" />
+      <texture unit="diffuse" name="Textures/terrain.png" />
       <output index="0" name="viewport" />
       <output index="1" name="albedo" />
       <output index="2" name="normal" />

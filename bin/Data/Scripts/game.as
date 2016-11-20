@@ -71,6 +71,9 @@ void setupLevel(int lvl)
 	
 	
 //	renderer.hdrRendering = true;
+
+	worldPhase = 0.;
+	worldAnim = 0.;
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -180,7 +183,7 @@ void setupLevel(int lvl)
 					"F12 - take screenshot \n\n";
 					
 	
-	spawnDolboshka(Vector3(0.,1.,0.),0.);
+	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
 	lvlphase = 1;
 		
@@ -194,8 +197,11 @@ void spawnDolboshka(Vector3 pos, float spd)
 	dlbnNode.position = pos;
 	dolboshka@ dlb = cast<dolboshka>(dlbnNode.CreateScriptObject(scriptFile, "dolboshka"));
 	StaticModel@ dlbmodel = dlbnNode.CreateComponent("StaticModel");
-	dlbmodel.model = cache.GetResource("Model", "Models/Teapot.mdl");
-	dlbnNode.scale = Vector3(5.,1.,5.);
+	dlbmodel.model = cache.GetResource("Model", "Models/dolboshka.mdl");
+	
+	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	dlbmodel.material = dlbmat;
+	
 	dlb.alt = pos.y;
 	dlb.speed = spd;
 	dlb.Init();
@@ -257,9 +263,9 @@ void switchPhase()
 		
 		if (lvlphase == 3)
 		{
-			spawnDolboshka(cpos + Vector3(50.,1.,0.),17.);
-			spawnDolboshka(cpos + Vector3(-50.,1.,0.),17.);
-			spawnDolboshka(cpos + Vector3(0.,1.,50.),17.);
+			spawnDolboshka(cpos + Vector3(50.,1.,0.),12.);
+			spawnDolboshka(cpos + Vector3(-50.,1.,0.),12.);
+			spawnDolboshka(cpos + Vector3(0.,1.,50.),12.);
 			dlbtogo = 3;
 		}
 	}
