@@ -256,8 +256,8 @@ void switchPhase()
 	{
 		if (lvlphase == 2)
 		{
-			spawnDolboshka(cpos + Vector3(50.,1.,0.),5.);
-			spawnDolboshka(cpos + Vector3(-50.,1.,0.),5.);
+			spawnDolboshka(cpos + Vector3(50.,4.,0.),5.);
+			spawnDolboshka(cpos + Vector3(-50.,2.,0.),5.);
 			dlbtogo = 2;
 		}
 		
@@ -267,6 +267,16 @@ void switchPhase()
 			spawnDolboshka(cpos + Vector3(-50.,1.,0.),12.);
 			spawnDolboshka(cpos + Vector3(0.,1.,50.),12.);
 			dlbtogo = 3;
+		}
+		
+		if (lvlphase == 4)
+		{
+			spawnDolboshka(cpos + Vector3(50.,-9.,0.),16.);
+			spawnDolboshka(cpos + Vector3(-50.,-7.,0.),16.);
+			spawnDolboshka(cpos + Vector3(50.,-4.,15.),16.);
+			spawnDolboshka(cpos + Vector3(-50.,-2.,15.),16.);
+			spawnDolboshka(cpos + Vector3(0.,0.,50.),16.);
+			dlbtogo = 5;
 		}
 	}
 }
@@ -585,7 +595,7 @@ class dolboshka : ScriptObject
 			node.Rotate(rotded);
 			dedtmr -= timeStep;
 			
-			worldAnim += 30. * timeStep;
+			worldAnim += 15. * timeStep;
 			updateWorld(worldAnim,worldAnim);
 			
 			if (dedtmr<0.)
@@ -612,7 +622,7 @@ class dolboshka : ScriptObject
 				vel *= speed;
 			}
 			
-			if (range>150)
+			if (range>200)
 			{
 				vel = heading * 200.;
 			}

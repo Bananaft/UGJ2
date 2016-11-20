@@ -105,8 +105,9 @@ void PS()
 
       if (fdepth>depth) discard;
 
-      vec3 col = texture2D(sNormalMap, vec2(0.5+0.02*(fract(intersection.x*2.12)+fract(intersection.z*1.89)),intersection.y*0.02)).rgb;
-
+      vec3 txt = texture2D(sDiffMap,vec2(intersection.x * 0.1,intersection.z* 0.1) ).rgb;
+      vec3 col = texture2D(sNormalMap, vec2(txt.g,intersection.y*0.07 + txt.r * 0.015)).rgb;
+      //vec3 col = txt;
       vec3 lightVec = normalize(vec3(0.3,0.4,0.2));
       float shad = softshadow(intersection, lightVec, 0.1,250.);
 
