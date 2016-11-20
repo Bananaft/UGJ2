@@ -134,11 +134,11 @@ void setupLevel(int lvl)
 	if (lvl == 1)
 	{
 		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv1.xml"));
-		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic1.xml"));
 
 	} else if (lvl == 2) {
 		rndpth.Load(cache.GetResource("XMLFile","RenderPaths/lv2.xml"));
-		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic.xml"));
+		rndpth2.Load(cache.GetResource("XMLFile","RenderPaths/logic2.xml"));
 		
 	}
 	//rndpth.shaderParameters["ANIM"] = Variant(500.);

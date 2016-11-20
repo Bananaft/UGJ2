@@ -1,0 +1,6 @@
+<renderpath>
+  <command type="quad" tag="collisions" vs="collisions" ps="collisions" psdefines="LV2">
+    <parameter name="ANIM" value="0" />
+    <parameter name="PHASE" value="0" />
+  </command>
+</renderpath>
