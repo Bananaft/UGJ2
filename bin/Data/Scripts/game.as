@@ -12,7 +12,6 @@ Texture2D@ logTex;
 
 Vector3 camVel = Vector3(0.,0.,0.);
 
-
 bool bmenu = false;
 bool blvl = false;
 int ilvl = 0;
@@ -82,7 +81,7 @@ void setupLevel(int lvl)
 	
 	camNode = scene_.CreateChild("CamNode");
 	Camera@ camera = camNode.CreateComponent("Camera");
-	camNode.position = Vector3(0,50,-230);
+	camNode.position = Vector3(0,50,-340);
 	camera.farClip = 200;
 	jetpack@ flcam = cast<jetpack>(camNode.CreateScriptObject(scriptFile, "jetpack"));
     flcam.Init();
@@ -344,18 +343,35 @@ float yaw = 0.0f; // Camera yaw angle
 float pitch = 0.0f; // Camera pitch angle
 float roll = 0.0f;
 
+SoundSource@ noise;
+SoundSource@ walk;
+SoundSource@ jet;
 
 void Init()
     {
-
+		audio.listener = node.CreateComponent("SoundListener");
         //node.position = Vector3(0,0,0);
+		noise = node.CreateComponent("SoundSource");
+		Sound@ nsound = cache.GetResource("Sound", "Sounds/Gray_noise.wav");
+		noise.Play(nsound);
+		noise.gain = 0.0f;
+		
+		walk = node.CreateComponent("SoundSource");
+		Sound@ wsound = cache.GetResource("Sound", "Sounds/walk.wav");
+		walk.Play(wsound);
+		walk.gain = 0.0f;
+		
+		jet = node.CreateComponent("SoundSource");
+		Sound@ jsound = cache.GetResource("Sound", "Sounds/jet.wav");
+		jet.Play(jsound);
+		jet.gain = 0.0f;
     }
 
 void Update(float timeStep)
 	{
         // Do not move if the UI has a focused element (the console)
-        if (ui.focusElement !is null)
-            return;
+        //if (ui.focusElement !is null)
+          //  return;
         Camera@ cam = node.GetComponent("camera");
         // Movement speed as world units per second
         float MOVE_SPEED = 20.;
@@ -403,8 +419,19 @@ void Update(float timeStep)
 		
 		if (input.keyDown[KEY_SPACE])
 		{
-			if(dist < 0.99) camVel.y += 60  * time.timeStep;
-			else camVel.y += 8. * time.timeStep;
+			jet.gain += 5. * timeStep;
+			
+			if(dist < 0.99)
+			{
+				camVel.y += 60  * time.timeStep;
+				jet.gain = Min(jet.gain,2.0);
+			} else {
+				camVel.y += 8. * time.timeStep;
+				jet.gain = Min(jet.gain,0.1);
+			}
+		} else {
+			jet.gain -= 0.4 * timeStep;
+			jet.gain =  Clamp(jet.gain,0.,1.);
 		}
 		
 		if (dist<0.7)
@@ -435,6 +462,14 @@ void Update(float timeStep)
 			
 		}
 		
+		if (dist<0.6)
+		{
+			walk.gain += 1.0 * timeStep;
+		} else {
+			walk.gain -= 1.0 * timeStep;
+		}
+		walk.gain = Clamp( walk.gain,0.,1.);
+		
 		camVel *= 1. - time.timeStep;
 
             // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
@@ -458,17 +493,28 @@ void Update(float timeStep)
 		if (input.keyPress[KEY_ESCAPE])
 		{
 			bmenu = true;
+			node.RemoveAllComponents();
 			self.Remove();
 			//node.Remove();
 		}
 		
-		
+		//noise.gain = Clamp((camVel.length * (0.2 + dist)-12.) * 0.1, 0. ,1.);
+		if (camVel.length > 15)
+		{
+			noise.gain += 0.2 * timeStep;
+			
+		} else {
+			noise.gain -= 1. * timeStep;
+		}
+		noise.gain = Clamp(noise.gain,0.,2.);
 /*		Color px2;
 		for (uint i=0; i<32;i++)
 			for (uint u=0; u<32;u++){
 				px2 = img.GetPixel(i,u);
 				log.Info(String(i));
 			}	*/
+			
+		
     }
 
 
@@ -510,6 +556,12 @@ class dolboshka : ScriptObject
 		{
 			ded = true;
 			dlbtogo--;
+			
+			Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
+			SoundSource@ sndSource = scene_.CreateComponent("SoundSource");
+			sndSource.Play(sound);
+			sndSource.gain = 0.9f;
+			sndSource.autoRemove = true;
 			
 			if (dlbtogo == 0)
 			{
@@ -615,6 +667,12 @@ class intro : ScriptObject
 		story.horizontalAlignment = HA_CENTER;
 		ui.root.AddChild(story);
 		story.opacity = 0.;
+		
+		Sound@ startsound = cache.GetResource("Sound", "Sounds/start.wav");
+		SoundSource@ soundSource = scene_.CreateComponent("SoundSource");
+		soundSource.Play(startsound);
+		soundSource.gain = 0.9f;
+		soundSource.autoRemove = true;
 	}
 	
 	void Update(float timeStep)

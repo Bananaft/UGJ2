@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="256510__hunter4708__gas-start_data" version="1.3.0" audacityversion="2.0.6" sel0="0.2359648552" sel1="0.2359648552" vpos="0" h="0.0000000000" zoom="652.6395631068" rate="96000.0" snapto="off" selectionformat="чч:мм:сс + миллисекунды">
+	<tags>
+		<tag name="YEAR" value="2011"/>
+	</tags>
+	<wavetrack name="256510__hunter4708__gas-start" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="96000" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="232623">
+				<waveblock start="0">
+					<simpleblockfile filename="e00003c8.au" len="232623" min="-0.335175" max="0.348083" rms="0.07072"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="256510__hunter4708__gas-start" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="96000" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="232623">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000304.au" len="232623" min="-0.318359" max="0.28421" rms="0.066175"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="137174__mwirth__gas-wird-angezundet" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="106861">
+				<waveblock start="0">
+					<simpleblockfile filename="e000008d.au" len="106861" min="-0.248885" max="0.238612" rms="0.058273"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="137174__mwirth__gas-wird-angezundet" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="106861">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000855.au" len="106861" min="-0.21441" max="0.25989" rms="0.05246"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>

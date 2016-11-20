@@ -1,0 +1,63 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="Hit_data" version="1.3.0" audacityversion="2.0.6" sel0="0.0000000000" sel1="0.0000000000" vpos="0" h="0.0000000000" zoom="206.2383151436" rate="44100.0" snapto="off" selectionformat="чч:мм:сс + миллисекунды">
+	<tags>
+		<tag name="Software" value="FL Studio 11"/>
+	</tags>
+	<wavetrack name="113609__treasureboxfilms__5crashes" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="0.316228" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="75482">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000c42.au" len="75482" min="-1.691472" max="1.657202" rms="0.408916"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+		<waveclip offset="1.71160998">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="122097">
+				<waveblock start="0">
+					<simpleblockfile filename="e00004d3.au" len="122097" min="-0.831476" max="0.776235" rms="0.101838"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="113609__treasureboxfilms__5crashes" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="0.316228" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="75482">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000c1d.au" len="75482" min="-1.525509" max="1.744391" rms="0.369062"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+		<waveclip offset="1.71160998">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="122097">
+				<waveblock start="0">
+					<simpleblockfile filename="e00009c7.au" len="122097" min="-0.683268" max="0.636389" rms="0.088253"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="231889__zxin__crash" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="98148">
+				<waveblock start="0">
+					<simpleblockfile filename="e00007ec.au" len="98148" min="-0.60614" max="0.583099" rms="0.07455"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="231889__zxin__crash" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="98148">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000966.au" len="98148" min="-0.629669" max="0.647186" rms="0.076497"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
