@@ -73,7 +73,7 @@ void setupLevel(int lvl)
 //	renderer.hdrRendering = true;
 
 	worldPhase = 0.;
-	worldAnim = 0.;
+	worldAnim = 45.;
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -89,6 +89,10 @@ void setupLevel(int lvl)
 	jetpack@ flcam = cast<jetpack>(camNode.CreateScriptObject(scriptFile, "jetpack"));
     flcam.Init();
 	
+	//Node@ fakeboxNode = camNode.CreateChild("Plane");
+	//fakeboxNode.scale = Vector3(20000.0f, 20000.0f, 20000.0f);
+	//StaticModel@ fakeboxObject = fakeboxNode.CreateComponent("StaticModel");
+	//fakeboxObject.model = cache.GetResource("Model", "Models/Box.mdl");
 	//Node@ fakeboxNode = scene_.CreateChild("Plane");
 	//StaticModel@ fakeboxObject = fakeboxNode.CreateComponent("StaticModel");
 	//fakeboxObject.model = cache.GetResource("Model", "Models/Sphere.mdl");
@@ -185,7 +189,7 @@ void setupLevel(int lvl)
 	
 	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
-	lvlphase = 1;
+	lvlphase = 3;
 		
 	
 
@@ -201,6 +205,25 @@ void spawnDolboshka(Vector3 pos, float spd)
 	
 	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
 	dlbmodel.material = dlbmat;
+	
+	dlb.alt = pos.y;
+	dlb.speed = spd;
+	dlb.Init();
+}
+
+void spawnZloboshka(Vector3 pos, float spd)
+{
+	Node@ dlbnNode = scene_.CreateChild("dlbNode");
+	dlbnNode.position = pos;
+	zloboshka@ dlb = cast<zloboshka>(dlbnNode.CreateScriptObject(scriptFile, "zloboshka"));
+	StaticModel@ dlbmodel = dlbnNode.CreateComponent("StaticModel");
+	dlbmodel.model = cache.GetResource("Model", "Models/Teapot.mdl");
+	dlbnNode.scale = Vector3( 4., 4., 4.);
+	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	dlbmodel.material = dlbmat;
+	Light@ zlbLight = dlbnNode.CreateComponent("Light");
+	zlbLight.range = 20;
+	zlbLight.color = Color(2.,0.2,0.03) * 4.;
 	
 	dlb.alt = pos.y;
 	dlb.speed = spd;
@@ -271,11 +294,11 @@ void switchPhase()
 		
 		if (lvlphase == 4)
 		{
-			spawnDolboshka(cpos + Vector3(50.,-9.,0.),16.);
-			spawnDolboshka(cpos + Vector3(-50.,-7.,0.),16.);
-			spawnDolboshka(cpos + Vector3(50.,-4.,15.),16.);
-			spawnDolboshka(cpos + Vector3(-50.,-2.,15.),16.);
-			spawnDolboshka(cpos + Vector3(0.,0.,50.),16.);
+			spawnZloboshka(cpos + Vector3(50.,-9.,0.),15.);
+			spawnZloboshka(cpos + Vector3(-50.,-7.,0.),15.);
+			spawnZloboshka(cpos + Vector3(50.,-4.,15.),15.);
+			spawnZloboshka(cpos + Vector3(-50.,-2.,15.),15.);
+			spawnZloboshka(cpos + Vector3(0.,0.,50.),15.);
 			dlbtogo = 5;
 		}
 	}
@@ -416,9 +439,11 @@ void Update(float timeStep)
 		
 		}
 		
-		if (input.mouseButtonPress[MOUSEB_RIGHT])
+		if (input.mouseButtonDown[MOUSEB_RIGHT])
 		{
-			
+			cam.zoom = 4.;
+		} else {
+			cam.zoom = 0.8;
 		}
 		Quaternion trot; trot.FromEulerAngles(0.,node.rotation.yaw,0.);
 		thrust.Normalize();
@@ -497,8 +522,8 @@ void Update(float timeStep)
          // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
         node.rotation = Quaternion(pitch, yaw, roll);
 
-        int mousescroll = input.mouseMoveWheel;
-        cam.zoom = Clamp(cam.zoom + mousescroll * cam.zoom * 0.2, 0.8 , 20.0 );
+        //int mousescroll = input.mouseMoveWheel;
+        //cam.zoom = Clamp(cam.zoom + mousescroll * cam.zoom * 0.2, 0.8 , 20.0 );
 		//log.Info(node.position.y);
         //check terrain collision
         //Vector3 campos = node.position;
@@ -568,24 +593,6 @@ class dolboshka : ScriptObject
 		float range = toCam.length;
 
 		
-		if (range<4.)
-		{
-			ded = true;
-			dlbtogo--;
-			
-			Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
-			SoundSource@ sndSource = scene_.CreateComponent("SoundSource");
-			sndSource.Play(sound);
-			sndSource.gain = 0.9f;
-			sndSource.autoRemove = true;
-			
-			if (dlbtogo == 0)
-			{
-				lvlphase++;
-				switchPhase();
-			}
-		}
-		
 		if(ded)
 		{
 			node.position += Vector3(vel.x * timeStep + camVel.x * 2 *timeStep,camVel.y * 2 *timeStep,vel.y * timeStep + camVel.z * 2 *timeStep);
@@ -611,10 +618,10 @@ class dolboshka : ScriptObject
 			}
 			else if (range<100)
 			{
-				heading = Vector2(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.x * time.elapsedTime+phase));
+				heading = Vector2(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.y * time.elapsedTime+phase));
 			}
 			
-			vel += heading * 0.2;
+			vel += heading * 12. * timeStep;
 			
 			if (vel.length > speed)
 			{
@@ -632,6 +639,138 @@ class dolboshka : ScriptObject
 			Quaternion rot;
 			rot.FromEulerAngles(0.,90.*timeStep,0.);
 			node.Rotate(rot);
+			
+			if (range<4.)
+			{
+				ded = true;
+				dlbtogo--;
+				
+				Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
+				SoundSource@ sndSource = node.CreateComponent("SoundSource");
+				sndSource.Play(sound);
+				sndSource.gain = 0.9f;
+				//sndSource.autoRemove = true;
+				
+				if (dlbtogo == 0)
+				{
+					lvlphase++;
+					switchPhase();
+				}
+			}
+			
+		}
+		
+		
+		
+    }
+}
+
+class zloboshka : ScriptObject
+{
+	float alt;
+	float speed = 10;
+	float phase = 0.;
+	Vector3 bhvr;
+	
+	Vector3 vel;
+	
+	bool ded = false;
+	float dedtmr = 1;
+	float rage = 150;
+	float ragetm = 4.;
+	
+	void Init()
+    {
+		
+        bhvr = Vector3(10 + Random(50),-5 + Random(300),10 + Random(50));
+    }
+	
+	void Update(float timeStep)
+    {
+		//node.position = Vector3(node.position.x,alt,node.position.z);
+		
+		
+		
+		
+		Vector3 toCam = camNode.position - node.position;
+
+		float range = toCam.length;
+		if (range > 10 ) toCam.y += 0.2 * range * range;
+		rage += (10 - range) * timeStep;
+		float boost;
+		if (rage < 0.)
+		{
+			boost = 4.; 
+			ragetm -= timeStep;
+			if (ragetm < 0.){
+				rage = 150.;
+				ragetm = 4.;
+			}
+			
+				
+		}	else boost = 1.;
+		log.Info(rage);
+		
+		Vector3 heading = (camNode.position + camVel * 2. * range * timeStep) - node.position;
+		heading.Normalize();
+		
+		if(ded)
+		{
+			node.position += Vector3(vel.x * timeStep + camVel.x * 2 *timeStep,camVel.y * 2 *timeStep,vel.y * timeStep + camVel.z * 2 *timeStep);
+			vel *= 0.95;
+			Quaternion rotded;
+			rotded.FromEulerAngles(Sin(phase)*360 * timeStep,Sin(bhvr.x * 20.)*360 * timeStep,Sin(bhvr.y * 20.)*360 * timeStep);
+			node.Rotate(rotded);
+			dedtmr -= timeStep;
+			
+			worldAnim += 15. * timeStep;
+			updateWorld(worldAnim,worldAnim);
+			
+			if (dedtmr<0.)
+			{
+				node.Remove();
+			}
+		} else {
+			
+			if (range<10)
+			{
+				//heading *= 1;
+				phase = Random(360);
+			}else if (range<150)
+			{
+				if (rage<0.) heading += Vector3(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.y * (time.elapsedTime+phase)),Sin(bhvr.z * (time.elapsedTime+phase))) * 80. * timeStep;
+				else heading += Vector3(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.y * (time.elapsedTime+phase)),Sin(bhvr.z * (time.elapsedTime+phase))) * 20. * timeStep;
+				
+			}else if (range<150)
+			{
+				heading += Vector3(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.y * (time.elapsedTime+phase)),Sin(bhvr.z * (time.elapsedTime+phase))) * 25. * timeStep;
+			}
+			
+			vel += heading * 13. * timeStep;
+			
+			if (vel.length > speed * boost)
+			{
+				vel.Normalize();
+				vel *= speed * boost;
+			}
+			
+			if (range>200)
+			{
+				vel = heading * 200.;
+			}
+			
+			node.position += vel * timeStep;
+			
+			Quaternion rot;
+			rot.FromLookRotation(heading,Vector3(0,1,0));
+			//rot.FromEulerAngles(0.,90.*timeStep,0.);
+			node.rotation = rot;
+			
+			if (range<4.)
+			{
+				camVel += ((camNode.position - node.position)+Vector3(0,0.1,0)) * 400. * timeStep;
+			}
+		
 			
 		}
 		
@@ -688,7 +827,7 @@ class intro : ScriptObject
 		SoundSource@ soundSource = scene_.CreateComponent("SoundSource");
 		soundSource.Play(startsound);
 		soundSource.gain = 0.9f;
-		soundSource.autoRemove = true;
+		//soundSource.autoRemove = true;
 	}
 	
 	void Update(float timeStep)
