@@ -414,7 +414,7 @@ void Update(float timeStep)
         Camera@ cam = node.GetComponent("camera");
         // Movement speed as world units per second
         float MOVE_SPEED = 20.;
-  
+		//log.Info(camVel.length);
         // Mouse sensitivity as degrees per pixel
         const float MOUSE_SENSITIVITY = 0.1 * 1/cam.zoom;
 		Vector3 thrust = Vector3(0.,0.,0.);
@@ -540,14 +540,16 @@ void Update(float timeStep)
 		}
 		
 		//noise.gain = Clamp((camVel.length * (0.2 + dist)-12.) * 0.1, 0. ,1.);
-		if (camVel.length > 15)
+/*		if (camVel.length > 19.0)
 		{
 			noise.gain += 0.2 * timeStep;
 			
 		} else {
-			noise.gain -= 1. * timeStep;
-		}
-		noise.gain = Clamp(noise.gain,0.,2.);
+			noise.gain -= 0.5 * timeStep;
+		}*/
+		
+		noise.gain = Pow(camVel.length/26., 5.);
+		noise.gain = Clamp(noise.gain,0.,1.);
 /*		Color px2;
 		for (uint i=0; i<32;i++)
 			for (uint u=0; u<32;u++){
@@ -578,6 +580,10 @@ class dolboshka : ScriptObject
     {
 		
         bhvr = Vector2(10 + Random(50),10 + Random(50));
+		SoundSource3D@ zlbsnd = node.CreateComponent("SoundSource3D");
+		Sound@ ghoul = cache.GetResource("Sound", "Sounds/ghoul.wav");
+		zlbsnd.Play(ghoul);
+		zlbsnd.farDistance = 40.;
     }
 	
 	void Update(float timeStep)
@@ -683,6 +689,11 @@ class zloboshka : ScriptObject
     {
 		
         bhvr = Vector3(10 + Random(50),-5 + Random(300),10 + Random(50));
+		
+		SoundSource3D@ zlbsnd = node.CreateComponent("SoundSource3D");
+		Sound@ ghoul = cache.GetResource("Sound", "Sounds/ghoul.wav");
+		zlbsnd.Play(ghoul);
+		zlbsnd.farDistance = 80.;
     }
 	
 	void Update(float timeStep)
@@ -709,7 +720,7 @@ class zloboshka : ScriptObject
 			
 				
 		}	else boost = 1.;
-		log.Info(rage);
+		//log.Info(rage);
 		
 		Vector3 heading = (camNode.position + camVel * 2. * range * timeStep) - node.position;
 		heading.Normalize();
