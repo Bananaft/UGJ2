@@ -4,6 +4,8 @@
 #include "ScreenPos.glsl"
 #include "fractal.glsl"
 
+uniform vec3 cCrsvec1;
+
 void VS()
 {
     mat4 modelMatrix = iModelMatrix;
@@ -27,6 +29,15 @@ vec3 calcNormal( in vec3 pos)
 void PS()
 {
   float dist = sdfmap(cCameraPosPS);
-  vec3 normal = calcNormal(cCameraPosPS);
-  gl_FragColor = vec4(normal,dist);
+  if (dist < 1.)
+  {
+    vec3 normal = calcNormal(cCameraPosPS);
+    gl_FragColor = vec4(normal,dist);
+  } else {
+    float cDist1 = sdfmap(cCrsvec1);
+      gl_FragColor = vec4(cDist1,0.,0.,dist);
+  }
+
+
+
 }

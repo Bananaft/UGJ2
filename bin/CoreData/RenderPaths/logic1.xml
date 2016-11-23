@@ -2,5 +2,8 @@
   <command type="quad" tag="collisions" vs="collisions" ps="collisions">
     <parameter name="ANIM" value="0" />
     <parameter name="PHASE" value="0" />
+    <parameter name="Crsvec1" value="0.0 0.0 0.0" />
+    <parameter name="Crsvec2" value="0.0 0.0 0.0" />
+    <parameter name="Crsvec2" value="0.0 0.0 0.0" />
   </command>
 </renderpath>

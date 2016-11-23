@@ -19,6 +19,7 @@ int dlbtogo;
 int lvlphase;
 float worldPhase = 0.;
 float worldAnim = 0.;
+bool spawnCrystls = false;
 
 float yaw = 0.0f; // Camera ya
 
@@ -73,7 +74,7 @@ void setupLevel(int lvl)
 //	renderer.hdrRendering = true;
 
 	worldPhase = 0.;
-	worldAnim = 45.;
+	worldAnim = 25.;
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -230,6 +231,19 @@ void spawnZloboshka(Vector3 pos, float spd)
 	dlb.Init();
 }
 
+void spawnCrystal(Vector3 pos)
+{
+	Node@ dlbnNode = scene_.CreateChild("dlbNode");
+	dlbnNode.position = pos;
+	//dolboshka@ dlb = cast<dolboshka>(dlbnNode.CreateScriptObject(scriptFile, "dolboshka"));
+	StaticModel@ dlbmodel = dlbnNode.CreateComponent("StaticModel");
+	dlbmodel.model = cache.GetResource("Model", "Models/Mushroom.mdl");
+	
+	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	dlbmodel.material = dlbmat;
+	
+}
+
 void updateWorld (float wphase, float wanim)
 {
 	RenderPath@ renderpath = rttViewport.renderPath.Clone();
@@ -290,15 +304,16 @@ void switchPhase()
 			spawnDolboshka(cpos + Vector3(-50.,1.,0.),12.);
 			spawnDolboshka(cpos + Vector3(0.,1.,50.),12.);
 			dlbtogo = 3;
-		}
+		}	
 		
 		if (lvlphase == 4)
 		{
-			spawnZloboshka(cpos + Vector3(50.,-9.,0.),15.);
-			spawnZloboshka(cpos + Vector3(-50.,-7.,0.),15.);
-			spawnZloboshka(cpos + Vector3(50.,-4.,15.),15.);
-			spawnZloboshka(cpos + Vector3(-50.,-2.,15.),15.);
-			spawnZloboshka(cpos + Vector3(0.,0.,50.),15.);
+			//spawnZloboshka(cpos + Vector3(50.,-9.,0.),15.);
+			//spawnZloboshka(cpos + Vector3(-50.,-7.,0.),15.);
+			//spawnZloboshka(cpos + Vector3(50.,-4.,15.),15.);
+			//spawnZloboshka(cpos + Vector3(-50.,-2.,15.),15.);
+			//spawnZloboshka(cpos + Vector3(0.,0.,50.),15.);
+			spawnCrystls = true;
 			dlbtogo = 5;
 		}
 	}
@@ -385,6 +400,8 @@ float roll = 0.0f;
 SoundSource@ noise;
 SoundSource@ walk;
 SoundSource@ jet;
+
+Vector3 exCpos1;
 
 void Init()
     {
@@ -556,9 +573,40 @@ void Update(float timeStep)
 				px2 = img.GetPixel(i,u);
 				log.Info(String(i));
 			}	*/
+		if (spawnCrystls)
+		{
+			if (px.r < 0.6 && px.r > 0.1)
+			{
+				spawnCrystal(exCpos1);
+			}
 			
+			
+			Vector3 csdir = Vector3(camVel.x,0.,camVel.z);
+			Quaternion csrot;
+			csrot.FromEulerAngles(0.,30-Random(60),0.);
+			csdir = csrot * csdir;
+			csdir.Normalize();
+			csdir *= 50;
+			csdir.y = 0.-Random(15);
+			
+			RenderPath@ renderpath = logVpt.renderPath.Clone();
+			
+			Vector3 checkVec = Vector3(node.position.x,0.,node.position.z);
+			checkVec += csdir;
+		
+			renderpath.shaderParameters["Crsvec1"] = Variant(checkVec);
+			//renderpath.shaderParameters["Crsvec2"] = wphase;
+			//renderpath.shaderParameters["Crsvec3"] = wphase;
+
+			logVpt.renderPath = renderpath;
+			
+			exCpos1 = checkVec;
+			
+		}
 		
     }
+	
+
 
 
 
@@ -757,7 +805,7 @@ class zloboshka : ScriptObject
 				heading += Vector3(Sin(bhvr.x * (time.elapsedTime+phase)),Sin(bhvr.y * (time.elapsedTime+phase)),Sin(bhvr.z * (time.elapsedTime+phase))) * 25. * timeStep;
 			}
 			
-			vel += heading * 13. * timeStep;
+			vel += heading * 18. * timeStep;
 			
 			if (vel.length > speed * boost)
 			{
