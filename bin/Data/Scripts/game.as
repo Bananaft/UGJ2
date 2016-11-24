@@ -19,7 +19,7 @@ int dlbtogo;
 int lvlphase;
 float worldPhase = 0.;
 float worldAnim = 0.;
-bool spawnCrystls = false;
+bool spawnCrystls = true;
 
 float yaw = 0.0f; // Camera ya
 
@@ -74,7 +74,7 @@ void setupLevel(int lvl)
 //	renderer.hdrRendering = true;
 
 	worldPhase = 0.;
-	worldAnim = 25.;
+	worldAnim = 85.;
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -578,16 +578,20 @@ void Update(float timeStep)
 			if (px.r < 0.6 && px.r > 0.1)
 			{
 				spawnCrystal(exCpos1);
+				log.Info("pew!");
 			}
-			
+			log.Info(node.position.y);
 			
 			Vector3 csdir = Vector3(camVel.x,0.,camVel.z);
 			Quaternion csrot;
 			csrot.FromEulerAngles(0.,30-Random(60),0.);
 			csdir = csrot * csdir;
 			csdir.Normalize();
-			csdir *= 50;
-			csdir.y = 0.-Random(15);
+			csdir *= 150;
+			if (ilvl == 1)
+			csdir.y = -20.-Random(30.);
+			else
+			csdir.y = 30 + Random(20.);
 			
 			RenderPath@ renderpath = logVpt.renderPath.Clone();
 			

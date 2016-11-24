@@ -55,7 +55,7 @@ float Voronoi3Tap(vec2 p){
 
 }
 
-float apo(vec3 pos)
+float apo(vec3 pos, float seed)
 {
   float dist;
   vec3 CSize = vec3(1., 1., 1.3);
@@ -70,7 +70,7 @@ float apo(vec3 pos)
       p = 2.0*clamp(p, -CSize, CSize) - p;
       r2 = dot(p,p);
       //float r2 = dot(p,p+sin(p.z*.3)); //Alternate fractal
-      k = max((2.0)/(r2), .0274); //.378888 //.13345 max((2.6)/(r2), .03211); //max((1.8)/(r2), .0018);
+      k = max((2.0)/(r2), seed); //.378888 //.13345 max((2.6)/(r2), .03211); //max((1.8)/(r2), .0018);
       p     *= k;
       scale *= k;
       uggg += r2;
@@ -83,20 +83,31 @@ float apo(vec3 pos)
   return dist;
 }
 
-float kali(vec3 p) {
+float drawObject(in vec3 p){ p = fract(p)-.5; return dot(p, p); }
 
-	//p.y = mod(p.y + 1.2, 2.4) - 1.2;
-	vec4 q = vec4(p, 1);
-	float orb = 10000.0;
-	for(int i = 0; i < 12; i++) {
-        // 3D Kaliset formula
-		q = 5.0*abs(q)/dot(q.xyz, q.xyz) - vec4(2.5, 1.2, 2.5, 0);
+float cellTile(in vec3 p){
 
-        // some random orbit trap.  Based on sqaure cosine.
-		orb = min(orb, sin(abs(q.x*q.y)));
-	}
+    // Draw four overlapping objects (spheres, in this case) at various positions throughout the tile.
+    vec4 d;
+    d.x = drawObject(p - vec3(.81, .62, .53));
+    p.xy = vec2(p.y-p.x, p.y + p.x)*.7071;
+    d.y = drawObject(p - vec3(.39, .2, .11));
+    p.yz = vec2(p.z-p.y, p.z + p.y)*.7071;
+    d.z = drawObject(p - vec3(.62, .24, .06));
+    p.xz = vec2(p.z-p.x, p.z + p.x)*.7071;
+    d.w = drawObject(p - vec3(.2, .82, .64));
 
-	return (length(q.xyz))/q.w - 0.01;
+    // Obtain the minimum, and you're done.
+    d.xy = min(d.xz, d.yw);
+
+    return min(d.x, d.y)*2.66; // Scale between zero and one... roughly.
+}
+
+float surfFunc(in vec3 p){
+
+    float c = cellTile(p/6.); // Resembles a standard 3D Voronoi layer.
+    return mix(c, cos(c*6.283*2.)*.5 + .5, .125); // Mixing in a touch of sinusoidal variation.
+
 }
 
 float sdSphere( vec3 p, float s )
@@ -109,6 +120,21 @@ vec3 pointRepetition(vec3 point, vec3 c)
 	point.x = mod(point.x, c.x) - 0.5*c.x;
 	point.z = mod(point.z, c.z) - 0.5*c.z;
 	return point;
+}
+
+
+// IQ's smooth minium function.
+float smin(float a, float b , float s){
+
+    float h = clamp( 0.5 + 0.5*(b-a)/s, 0. , 1.);
+    return mix(b, a, h) - h*(1.0-h)*s;
+}
+
+// Smooth maximum, based on IQ's smooth minimum.
+float smax(float a, float b, float s){
+
+    float h = clamp( 0.5 + 0.5*(a-b)/s, 0., 1.);
+    return mix(b, a, h) + h*(1.0-h)*s;
 }
 
 float sdfmap(vec3 pos)
@@ -124,17 +150,23 @@ float sdfmap(vec3 pos)
 
 		vec3 apopos = pointRepetition(pos,vec3(500.,0,500.));
 
-	  float apodist = 0.1 * (7+pos.y) - apo(apopos * 0.5) * 2.  * ftime;
+	  float apodist = 0.1 * (7+pos.y) - apo(apopos * 0.5, .0274) * 2.  * ftime;
 	  dist = 0.2  * pos.y + noise * pow(min(vtime * 0.05,1.),2.2);
 	  dist = min(mix(pos.y,noise,ftime) -(apodist),dist+apodist);
 	#else
-		float v = Voronoi3Tap(pos.xz * 0.01) * 10.;
-		vec3 kpos = pointRepetition(pos ,vec3(500.,0,500.));
-		float k = kali(kpos * 0.02) * 10.;
-		dist = pos.y + 15.;
-		float sph = sdSphere(vec3(2.+2.*v, pos.y,2.+2.*v),20.);
-		dist = min(max(sph,  0.7 - 1. * k),dist + k *0.5);
-		dist = min(dist, max(-pos.y * 0.2 + 10.+ 2. * (1. -v) , k));
+		dist = pos.y;
+		float sf = surfFunc(pos * 0.1);
+ 		float cav = dot(cos(pos*3.14159265/16.), sin(pos.yzx*3.14159265/16.)) + 2.;
+		dist =  0.05 * dist - sf * 20.;
+
+		vec3 apopos = pointRepetition(pos,vec3(500.,0,500.));
+		apopos.y -= 60.;
+		float apodist =  apo(apopos * 0.5, .0274) * 2.;
+		dist = max((apodist),dist + 2. + apodist);
+
+		//dist = mix(dist, pos.y,0.0001);
+		//dist = 0.8 * dist - ( 0.5 - cav) * 1.25;
+		//dist = dist + .75 + (1.5-sf * 2.);;
 	#endif
   return dist;
 }
