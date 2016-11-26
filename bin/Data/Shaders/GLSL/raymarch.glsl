@@ -127,13 +127,13 @@ void PS()
   //gl_FragColor = vec4(ambient , 1.0);
   #ifndef PREMARCH
     gl_FragData[0] = vec4(mix(col,vec3(0.8),fog),0.);//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
-    gl_FragData[1] = vec4(0.5);
+    gl_FragData[1] = vec4(1.5);
     //gl_FragData[0] = vec4(float(stps)/256,0.,0.,0.);//vec4(float(stps)/cRAY_STEPS,0.,0.,0.);//vec4(mimus , plus,0.,0.); //vec4(vec3(0.3) * (1.-fog),1.0);
     //gl_FragData[1] = vec4(0.);//vec4(diffColor.rgb * fog, 1.7 );
 
 
 
-    gl_FragData[2] = vec4(0.0,-1.,0.,0.);// * 0.5 + 0.5
+    gl_FragData[2] = vec4(0.0,1.,0.,0.);// * 0.5 + 0.5
     gl_FragData[3] = vec4(EncodeDepth(fdepth), 0.0);//
   #else
     gl_FragColor =  vec4(totalDistance ,0. , 0. , 0.);
