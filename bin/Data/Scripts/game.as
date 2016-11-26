@@ -23,8 +23,8 @@ int lvlphase;
 float worldPhase = 0.;
 float worldAnim = 0.;
 float worldTPhase = 0.;
-float worldPhaseSpeed = 0.;
-float worldAnimSpeed = 0.;
+float worldPhaseSpeed = 0.2;
+float worldAnimSpeed = 0.0;
 
 
 bool spawnCrystls = false;
@@ -305,6 +305,7 @@ void switchPhase()
 			spawnDolboshka(cpos + Vector3(50.,4.,0.),5.);
 			spawnDolboshka(cpos + Vector3(-50.,2.,0.),5.);
 			dlbtogo = 2;
+			worldTPhase = 20.;
 		}
 		
 		if (lvlphase == 3)
@@ -527,7 +528,10 @@ void Update(float timeStep)
 				else if (normal.z<-trs)camVel.z *= -1;// Min(camVel.z,0.);*/
 			}
 			
+			if (worldPhase<worldTPhase) worldPhase += worldPhaseSpeed * timeStep;
+			worldAnim += worldAnimSpeed * timeStep;
 			
+			updateWorld(worldPhase,worldAnim);
 		}
 		
 		if (dist<0.6)
@@ -685,7 +689,7 @@ class dolboshka : ScriptObject
 			dedtmr -= timeStep;
 			
 			worldAnim += 15. * timeStep;
-			updateWorld(worldAnim,worldAnim);
+			//updateWorld(worldPhase,worldAnim);
 			
 			if (dedtmr<0.)
 			{
@@ -815,7 +819,7 @@ class zloboshka : ScriptObject
 			dedtmr -= timeStep;
 			
 			worldAnim += 15. * timeStep;
-			updateWorld(worldAnim,worldAnim);
+			//updateWorld(worldPhase,worldAnim);
 			
 			if (dedtmr<0.)
 			{

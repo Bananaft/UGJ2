@@ -20,41 +20,6 @@ float noise3d(vec3 x) {
 					mix(hash(n + 270.0), hash(n + 271.0), f.x), f.y), f.z);
 }
 
-vec2 hash22(vec2 p) {
-
-    // Faster, but probably doesn't disperse things as nicely as other ways.
-    float n = sin(dot(p,vec2(41, 289)));
-    p = fract(vec2(8.0*n, n)*262144.);
-    return sin(p*6.2831853 + cANIM);
-}
-
-float Voronoi3Tap(vec2 p){
-
-	// Simplex grid stuff.
-    //
-    vec2 s = floor(p + (p.x+p.y)*0.3660254); // Skew the current point.
-    p -= s - (s.x+s.y)*0.2113249; // Use it to attain the vector to the base vertice (from p).
-
-    // Determine which triangle we're in. Much easier to visualize than the 3D version.
-    float i = step(0.0, p.x-p.y);
-
-    // Vectors to the other two triangle vertices.
-    vec2 p1 = p - vec2(i, 1.0-i) + 0.2113249, p2 = p - 0.5773502;
-
-    // Add some random gradient offsets to the three vectors above.
-    p += hash22(s)*0.125;
-    p1 += hash22(s +  vec2(i, 1.0-i))*0.125;
-    p2 += hash22(s + 1.0)*0.125;
-
-    // Determine the minimum Euclidean distance. You could try other distance metrics,
-    // if you wanted.
-    float d = min(min(dot(p, p), dot(p1, p1)), dot(p2, p2))/0.425;
-
-    // That's all there is to it.
-    return sqrt(d); // Take the square root, if you want, but it's not mandatory.
-
-}
-
 float apo(vec3 pos, float seed)
 {
   float dist;
