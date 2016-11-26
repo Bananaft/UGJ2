@@ -1,6 +1,9 @@
 #include "freelookCam.as";
 Scene@ scene_;
 Node@ camNode;
+
+//SoundPlayer@ player = SoundPlayer();
+
 IntVector2 gres = IntVector2(640,360);
 
 Viewport@ rttViewport;
@@ -19,7 +22,12 @@ int dlbtogo;
 int lvlphase;
 float worldPhase = 0.;
 float worldAnim = 0.;
-bool spawnCrystls = true;
+float worldTPhase = 0.;
+float worldPhaseSpeed = 0.;
+float worldAnimSpeed = 0.;
+
+
+bool spawnCrystls = false;
 
 float yaw = 0.0f; // Camera ya
 
@@ -37,6 +45,7 @@ void Start()
 	SubscribeToEvent("Update", "HandleUpdate");
 	
 	setupTitle();
+	
 	
 }
 
@@ -74,7 +83,7 @@ void setupLevel(int lvl)
 //	renderer.hdrRendering = true;
 
 	worldPhase = 0.;
-	worldAnim = 85.;
+	worldAnim = 0.;
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -190,7 +199,7 @@ void setupLevel(int lvl)
 	
 	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
-	lvlphase = 3;
+	lvlphase = 1;
 		
 	
 
@@ -391,6 +400,7 @@ void HandleKeyDown(StringHash eventType, VariantMap& eventData)
 
 }
 
+
 class jetpack : ScriptObject
 {
 float yaw = 0.0f; // Camera yaw angle
@@ -578,9 +588,9 @@ void Update(float timeStep)
 			if (px.r < 0.6 && px.r > 0.1)
 			{
 				spawnCrystal(exCpos1);
-				log.Info("pew!");
+				//log.Info("pew!");
 			}
-			log.Info(node.position.y);
+			//log.Info(node.position.y);
 			
 			Vector3 csdir = Vector3(camVel.x,0.,camVel.z);
 			Quaternion csrot;
@@ -610,10 +620,23 @@ void Update(float timeStep)
 		
     }
 	
+	void PlaySound(const String&in soundName)
+    {
+        SoundSource@ source = node.CreateComponent("SoundSource");
+        Sound@ sound = cache.GetResource("Sound", soundName);
+        // Subscribe to sound finished for cleaning up the source
+        SubscribeToEvent(node, "SoundFinished", "HandleSoundFinished");
 
-
-
-
+        //source.SetDistanceAttenuation(2, 50, 1);
+        source.Play(sound);
+    }
+    
+    void HandleSoundFinished(StringHash eventType, VariantMap& eventData)
+    {
+        SoundSource@ source = eventData["SoundSource"].GetPtr();
+        source.Remove();
+    }
+	
 }
 
 class dolboshka : ScriptObject
@@ -624,7 +647,7 @@ class dolboshka : ScriptObject
 	Vector2 bhvr;
 	
 	Vector2 vel;
-	
+	SoundSource3D@ zlbsnd;
 	bool ded = false;
 	float dedtmr = 1;
 	
@@ -632,10 +655,10 @@ class dolboshka : ScriptObject
     {
 		
         bhvr = Vector2(10 + Random(50),10 + Random(50));
-		SoundSource3D@ zlbsnd = node.CreateComponent("SoundSource3D");
+		zlbsnd = node.CreateComponent("SoundSource3D");
 		Sound@ ghoul = cache.GetResource("Sound", "Sounds/ghoul.wav");
 		zlbsnd.Play(ghoul);
-		zlbsnd.farDistance = 40.;
+		zlbsnd.farDistance = 80.;
     }
 	
 	void Update(float timeStep)
@@ -653,6 +676,7 @@ class dolboshka : ScriptObject
 		
 		if(ded)
 		{
+			zlbsnd.gain -= timeStep;
 			node.position += Vector3(vel.x * timeStep + camVel.x * 2 *timeStep,camVel.y * 2 *timeStep,vel.y * timeStep + camVel.z * 2 *timeStep);
 			vel *= 0.95;
 			Quaternion rotded;
@@ -703,11 +727,13 @@ class dolboshka : ScriptObject
 				ded = true;
 				dlbtogo--;
 				
-				Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
-				SoundSource@ sndSource = node.CreateComponent("SoundSource");
-				sndSource.Play(sound);
-				sndSource.gain = 0.9f;
+				//Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
+				//SoundSource@ sndSource = node.CreateComponent("SoundSource");
+				//sndSource.Play(sound);
+				//sndSource.gain = 0.9f;
 				//sndSource.autoRemove = true;
+				jetpack@ player2 = cast<jetpack>(camNode.GetScriptObject("jetpack"));
+				player2.PlaySound("Sounds/hit.wav");
 				
 				if (dlbtogo == 0)
 				{
@@ -721,6 +747,8 @@ class dolboshka : ScriptObject
 		
 		
     }
+	
+
 }
 
 class zloboshka : ScriptObject

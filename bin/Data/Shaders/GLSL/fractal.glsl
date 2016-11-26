@@ -139,24 +139,24 @@ float smax(float a, float b, float s){
 
 float sdfmap(vec3 pos)
 {
-	float vtime = cANIM;
+	//float vtime = cANIM;
 	float dist = 10000.;
 	#ifndef LV2
 	  vec3 npos = pos;
-	  npos.y += vtime;
+	  npos.y += cANIM;
 	  npos.xz *= 0.6;
-		float ftime =  min(vtime * 0.01,1.);
+		float ftime =  min(cPHASE * 0.01,1.);
 	  float noise = noise3d(npos * 0.1) * 10.;
 
 		vec3 apopos = pointRepetition(pos,vec3(500.,0,500.));
 
 	  float apodist = 0.1 * (7+pos.y) - apo(apopos * 0.5, .0274) * 2.  * ftime;
-	  dist = 0.2  * pos.y + noise * pow(min(vtime * 0.05,1.),2.2);
+	  dist = 0.2  * pos.y + noise * pow(min(cPHASE * 0.05,1.),2.2);
 	  dist = min(mix(pos.y,noise,ftime) -(apodist),dist+apodist);
 	#else
 		dist = pos.y;
 		float sf = surfFunc(pos * 0.1);
- 		float cav = dot(cos(pos*3.14159265/16.), sin(pos.yzx*3.14159265/16.)) + 2.;
+ 		//float cav = dot(cos(pos*3.14159265/16.), sin(pos.yzx*3.14159265/16.)) + 2.;
 		dist =  0.05 * dist - sf * 20.;
 
 		vec3 apopos = pointRepetition(pos,vec3(500.,0,500.));
