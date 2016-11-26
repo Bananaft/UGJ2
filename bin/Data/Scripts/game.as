@@ -25,7 +25,8 @@ float worldAnim = 0.;
 float worldTPhase = 0.;
 float worldPhaseSpeed = 5.0;
 float worldAnimSpeed = 0.0;
-
+int crystals = 0;
+int numcrystals = 0;
 
 bool spawnCrystls = false;
 
@@ -251,6 +252,9 @@ void spawnCrystal(Vector3 pos)
 	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
 	dlbmodel.material = dlbmat;
 	
+	crystal@ crst = cast<crystal>(dlbnNode.CreateScriptObject(scriptFile,"crystal"));
+	crst.Init();
+	numcrystals ++;
 }
 
 void updateWorld (float wphase, float wanim)
@@ -334,6 +338,8 @@ void switchPhase()
 		{
 			//spawnZloboshka(cpos + Vector3(50.,-9.,0.),15.);
 			//spawnZloboshka(cpos + Vector3(-50.,-7.,0.),15.);
+			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
+			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
 			spawnDolboshka(cpos + Vector3(50.,-5.,15.),15.);
 			spawnDolboshka(cpos + Vector3(-50.,-10.,15.),15.);
 			spawnDolboshka(cpos + Vector3(0.,15.,50.),15.);
@@ -607,9 +613,10 @@ void Update(float timeStep)
 			}	*/
 		if (spawnCrystls)
 		{
-			if (px.r < 0.6 && px.r > 0.1)
+			if (px.r < 0.6 && px.r > 0.1 && numcrystals<40)
 			{
 				spawnCrystal(exCpos1);
+				
 				//log.Info("pew!");
 			}
 			//log.Info(node.position.y);
@@ -645,6 +652,9 @@ void Update(float timeStep)
 		
 		updateWorld(worldPhase,worldAnim);
 		
+		log.Info(numcrystals);
+		log.Info(crystals);
+		
     }
 	
 	void PlaySound(const String&in soundName)
@@ -663,6 +673,38 @@ void Update(float timeStep)
         SoundSource@ source = eventData["SoundSource"].GetPtr();
         source.Remove();
     }
+	
+}
+
+class crystal : ScriptObject
+{
+	void Init()
+    {
+	}
+	
+	void Update(float timeStep)
+    {
+		Vector3 toCam = camNode.position - node.position;
+		float range = toCam.length;
+		
+		if (range < 10.) node.position -= (node.position - camNode.position) * 4. * timeStep;
+		
+		if (range < 2.)
+		{
+			crystals ++; 
+			numcrystals --;
+			node.Remove();
+			
+		}
+		
+		if (range > 220.)
+		{
+			//crystals ++;
+			numcrystals --;
+			node.Remove();
+			
+		}
+	}
 	
 }
 
