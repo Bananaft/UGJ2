@@ -273,9 +273,9 @@ void spawnZloboshka(Vector3 pos, float spd)
 	dlbnNode.position = pos;
 	zloboshka@ dlb = cast<zloboshka>(dlbnNode.CreateScriptObject(scriptFile, "zloboshka"));
 	StaticModel@ dlbmodel = dlbnNode.CreateComponent("StaticModel");
-	dlbmodel.model = cache.GetResource("Model", "Models/Teapot.mdl");
-	dlbnNode.scale = Vector3( 4., 4., 4.);
-	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	dlbmodel.model = cache.GetResource("Model", "Models/zloboshka.mdl");
+	//dlbnNode.scale = Vector3( 4., 4., 4.);
+	Material@ dlbmat = cache.GetResource("Material", "Materials/zlbmat.xml");
 	dlbmodel.material = dlbmat;
 	Light@ zlbLight = dlbnNode.CreateComponent("Light");
 	zlbLight.range = 20;
