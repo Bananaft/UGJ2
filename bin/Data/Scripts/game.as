@@ -23,7 +23,7 @@ int lvlphase;
 float worldPhase = 0.;
 float worldAnim = 0.;
 float worldTPhase = 0.;
-float worldPhaseSpeed = 0.2;
+float worldPhaseSpeed = 5.0;
 float worldAnimSpeed = 0.0;
 
 
@@ -305,26 +305,46 @@ void switchPhase()
 			spawnDolboshka(cpos + Vector3(50.,4.,0.),5.);
 			spawnDolboshka(cpos + Vector3(-50.,2.,0.),5.);
 			dlbtogo = 2;
-			worldTPhase = 20.;
+			worldTPhase = 25.;
 		}
 		
 		if (lvlphase == 3)
 		{
-			spawnDolboshka(cpos + Vector3(50.,1.,0.),12.);
-			spawnDolboshka(cpos + Vector3(-50.,1.,0.),12.);
-			spawnDolboshka(cpos + Vector3(0.,1.,50.),12.);
+			spawnDolboshka(cpos + Vector3(150.,1.,0.),12.);
+			spawnDolboshka(cpos + Vector3(-150.,1.,0.),12.);
+			spawnDolboshka(cpos + Vector3(0.,1.,150.),12.);
 			dlbtogo = 3;
+			worldTPhase = 35.;
 		}	
 		
 		if (lvlphase == 4)
 		{
+			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
+			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
+			spawnDolboshka(cpos + Vector3(150.,-2.,15.),15.);
+			spawnDolboshka(cpos + Vector3(-150.,-0.,15.),15.);
+			spawnDolboshka(cpos + Vector3(0.,2.,150.),15.);
+			//spawnCrystls = true;
+			dlbtogo = 3;
+			worldTPhase = 55.;
+			worldPhaseSpeed = 1.;
+		}
+		
+		if (lvlphase == 5)
+		{
 			//spawnZloboshka(cpos + Vector3(50.,-9.,0.),15.);
 			//spawnZloboshka(cpos + Vector3(-50.,-7.,0.),15.);
-			//spawnZloboshka(cpos + Vector3(50.,-4.,15.),15.);
-			//spawnZloboshka(cpos + Vector3(-50.,-2.,15.),15.);
-			//spawnZloboshka(cpos + Vector3(0.,0.,50.),15.);
+			spawnDolboshka(cpos + Vector3(50.,-5.,15.),15.);
+			spawnDolboshka(cpos + Vector3(-50.,-10.,15.),15.);
+			spawnDolboshka(cpos + Vector3(0.,15.,50.),15.);
+			//spawnCrystls = true;
+			dlbtogo = 3;
+			worldTPhase = 80.;
+			worldAnimSpeed = 0.2;
+		}
+		if (lvlphase == 6)
+		{
 			spawnCrystls = true;
-			dlbtogo = 5;
 		}
 	}
 }
@@ -457,10 +477,12 @@ void Update(float timeStep)
         if (input.keyDown['D'])
             thrust += Vector3(1.0f, 0.0f, 0.0f);
       			
-		if (input.keyDown['R'])
-           node.position = Vector3(0.0f , 14.0f , -20.0f);
+		//if (input.keyDown['R'])
+        //   node.position = Vector3(0.0f , 14.0f , -20.0f);
 		   
-
+		if (input.keyDown['T'])
+          worldPhase = worldTPhase;
+		   
 		   
 		if (input.mouseButtonPress[MOUSEB_LEFT])
 		{
@@ -528,10 +550,6 @@ void Update(float timeStep)
 				else if (normal.z<-trs)camVel.z *= -1;// Min(camVel.z,0.);*/
 			}
 			
-			if (worldPhase<worldTPhase) worldPhase += worldPhaseSpeed * timeStep;
-			worldAnim += worldAnimSpeed * timeStep;
-			
-			updateWorld(worldPhase,worldAnim);
 		}
 		
 		if (dist<0.6)
@@ -566,7 +584,7 @@ void Update(float timeStep)
 		{
 			bmenu = true;
 			node.RemoveAllComponents();
-			self.Remove();
+			//self.Remove();
 			//node.Remove();
 		}
 		
@@ -622,6 +640,11 @@ void Update(float timeStep)
 			
 		}
 		
+		if (worldPhase<worldTPhase) worldPhase += worldPhaseSpeed * timeStep;
+		worldAnim += worldAnimSpeed * timeStep;
+		
+		updateWorld(worldPhase,worldAnim);
+		
     }
 	
 	void PlaySound(const String&in soundName)
@@ -676,7 +699,8 @@ class dolboshka : ScriptObject
 		Vector2 heading = Vector2(toCam.x,toCam.z);
 		heading.Normalize();
 		float range = toCam.length;
-
+		
+		if (input.keyDown['R']) node.position -= (node.position - camNode.position) *0.2;
 		
 		if(ded)
 		{
@@ -688,7 +712,7 @@ class dolboshka : ScriptObject
 			node.Rotate(rotded);
 			dedtmr -= timeStep;
 			
-			worldAnim += 15. * timeStep;
+			worldAnim += 5. * timeStep;
 			//updateWorld(worldPhase,worldAnim);
 			
 			if (dedtmr<0.)
@@ -728,22 +752,7 @@ class dolboshka : ScriptObject
 			
 			if (range<4.)
 			{
-				ded = true;
-				dlbtogo--;
-				
-				//Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
-				//SoundSource@ sndSource = node.CreateComponent("SoundSource");
-				//sndSource.Play(sound);
-				//sndSource.gain = 0.9f;
-				//sndSource.autoRemove = true;
-				jetpack@ player2 = cast<jetpack>(camNode.GetScriptObject("jetpack"));
-				player2.PlaySound("Sounds/hit.wav");
-				
-				if (dlbtogo == 0)
-				{
-					lvlphase++;
-					switchPhase();
-				}
+				die();
 			}
 			
 		}
@@ -752,6 +761,25 @@ class dolboshka : ScriptObject
 		
     }
 	
+	void die()
+	{
+		ded = true;
+		dlbtogo--;
+		
+		//Sound@ sound = cache.GetResource("Sound", "Sounds/hit.wav");
+		//SoundSource@ sndSource = node.CreateComponent("SoundSource");
+		//sndSource.Play(sound);
+		//sndSource.gain = 0.9f;
+		//sndSource.autoRemove = true;
+		jetpack@ player2 = cast<jetpack>(camNode.GetScriptObject("jetpack"));
+		player2.PlaySound("Sounds/hit.wav");
+		
+		if (dlbtogo == 0)
+		{
+			lvlphase++;
+			switchPhase();
+		}				
+	}
 
 }
 
@@ -866,11 +894,12 @@ class zloboshka : ScriptObject
 				camVel += ((camNode.position - node.position)+Vector3(0,0.1,0)) * 400. * timeStep;
 			}
 		
+		
 			
 		}
 		
 		
-		
+		if (lvlphase == 6) ded = true;
     }
 }
 
