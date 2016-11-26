@@ -6,10 +6,6 @@
 
 varying vec2 vTexCoord;
 varying vec4 vWorldPos;
-;
-#ifdef VERTEXCOLOR
-    varying vec4 vColor;
-#endif
 
 void VS()
 {
@@ -30,7 +26,7 @@ void PS()
 	vec4 col = texture2D(sDiffMap, vTexCoord.xy);
 	//vec4 heightmap = texture2D(sDiffMap, vTexCoord.xy);
 	vec3 diffColor = col.xyz;
-  float y = vWorldPos.y;
+  float y = vTexCoord.y * -3.;
   vec3 cls = mix(vec3(0.02,0.9,0.2),vec3(0.05,0.5,0.75),abs(2.*(fract(y*0.977 + cElapsedTimePS*0.8)-0.5)));
   vec3 glowCol = cls * (0.8 + fract(y*2 + cElapsedTimePS*3.33));
   //glowCol = normalize(glowCol) * 2.;

@@ -31,6 +31,12 @@ int numcrystals = 0;
 bool spawnCrystls = false;
 
 float yaw = 0.0f; // Camera ya
+Sprite@ fuelSprite;
+float fuel;
+float maxfuel = 100.;
+Sprite@ healthSprite;
+float health;
+float maxhealth = 100.;
 
 void Start()
 {
@@ -82,9 +88,18 @@ void setupLevel(int lvl)
 	
 	
 //	renderer.hdrRendering = true;
-
-	worldPhase = 0.;
-	worldAnim = 0.;
+	
+	 worldPhase = 0.;
+	 worldAnim = 0.;
+	 worldTPhase = 0.;
+	 worldPhaseSpeed = 5.0;
+	 worldAnimSpeed = 0.0;
+	 crystals = 0;
+	fuel = 20;
+	health = 100;
+	 numcrystals = 0;
+	spawnCrystls = false;
+	 
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -174,6 +189,35 @@ void setupLevel(int lvl)
 	screen.horizontalAlignment = HA_CENTER;
 	ui.root.AddChild(screen);
 	
+	Texture2D@ fuelTex = cache.GetResource("Texture2D", "Textures/fuel.png");
+	fuelSprite = Sprite();
+	fuelSprite.texture = fuelTex;
+	fuelSprite.size = IntVector2(32,16);
+	fuelSprite.position = Vector2(0,-20);
+	fuelSprite.verticalAlignment = VA_TOP;
+	fuelSprite.horizontalAlignment = HA_LEFT;
+	screen.AddChild(fuelSprite);
+	
+	Text@ ftxt = fuelSprite.CreateChild("Text");
+	ftxt.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 20);
+	ftxt.color = Color(0.,0.,0.);
+	ftxt.text = "PROPELLANT";
+	ftxt.position = IntVector2(5,-6);
+	
+	Texture2D@ healthTex = cache.GetResource("Texture2D", "Textures/health.png");
+	healthSprite = Sprite();
+	healthSprite.texture = healthTex;
+	healthSprite.size = IntVector2(32,16);
+	healthSprite.position = Vector2(0,-40);
+	healthSprite.verticalAlignment = VA_TOP;
+	healthSprite.horizontalAlignment = HA_LEFT;
+	screen.AddChild(healthSprite);
+	
+	Text@ htxt = healthSprite.CreateChild("Text");
+	htxt.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 20);
+	htxt.color = Color(0.,0.,0.);
+	htxt.text = "HEALTH";
+	htxt.position = IntVector2(5,-6);
 	
 	Sprite@ screen2 = Sprite();
 	screen2.texture = logTex;
@@ -201,6 +245,7 @@ void setupLevel(int lvl)
 	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
 	lvlphase = 1;
+		
 		
 	
 
@@ -304,6 +349,7 @@ void switchPhase()
 	
 	if (ilvl == 1)
 	{
+			
 		if (lvlphase == 2)
 		{
 			spawnDolboshka(cpos + Vector3(50.,4.,0.),5.);
@@ -342,7 +388,7 @@ void switchPhase()
 			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
 			spawnDolboshka(cpos + Vector3(50.,-5.,15.),15.);
 			spawnDolboshka(cpos + Vector3(-50.,-10.,15.),15.);
-			spawnDolboshka(cpos + Vector3(0.,15.,50.),15.);
+			spawnDolboshka(cpos + Vector3(0.,7.,50.),15.);
 			//spawnCrystls = true;
 			dlbtogo = 3;
 			worldTPhase = 80.;
@@ -352,6 +398,9 @@ void switchPhase()
 		{
 			spawnCrystls = true;
 		}
+	} else if (ilvl == 2)
+	{
+		spawnCrystls = true;
 	}
 }
 
@@ -390,7 +439,9 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
 		scene_.RemoveAllChildren();
 		startLevel(ilvl);
 		blvl = false;
+		if (ilvl == 2) spawnCrystls = true;
 	}
+	
 }
 	
 void HandleKeyDown(StringHash eventType, VariantMap& eventData)
@@ -514,7 +565,7 @@ void Update(float timeStep)
 		camVel.y -= 9.8 * time.timeStep;
 		camNode.position += camVel * time.timeStep;
 		
-		if (input.keyDown[KEY_SPACE])
+		if (input.keyDown[KEY_SPACE] && fuel > 0.)
 		{
 			jet.gain += 5. * timeStep;
 			
@@ -522,9 +573,11 @@ void Update(float timeStep)
 			{
 				camVel.y += 60  * time.timeStep;
 				jet.gain = Min(jet.gain,2.0);
+				fuel -= 50 * timeStep;
 			} else {
 				camVel.y += 8. * time.timeStep;
 				jet.gain = Min(jet.gain,0.1);
+				fuel -= 15 * timeStep;
 			}
 		} else {
 			jet.gain -= 0.4 * timeStep;
@@ -554,6 +607,8 @@ void Update(float timeStep)
 				
 				if (normal.z>trs)camVel.z *= -1;// Max(camVel.z,0.);
 				else if (normal.z<-trs)camVel.z *= -1;// Min(camVel.z,0.);*/
+				if (dist<0.05) health -= 25 * timeStep;
+			
 			}
 			
 		}
@@ -655,6 +710,18 @@ void Update(float timeStep)
 		log.Info(numcrystals);
 		log.Info(crystals);
 		
+		
+		fuelSprite.size = IntVector2(fuel/maxfuel * gres.x * 2.,16);
+		if (fuel<maxfuel)
+			fuel += (1-dist) * 125 * timeStep;
+			
+		fuel = Clamp(fuel,0,maxfuel);
+		
+		healthSprite.size = IntVector2(health / maxhealth * gres.x * 2.,16);
+		if (health<maxhealth)
+			health += (1-dist) * Max(5.-camVel.length,0.) * 10 * timeStep;
+			
+		health = Min(health,maxhealth);
     }
 	
 	void PlaySound(const String&in soundName)
@@ -687,10 +754,13 @@ class crystal : ScriptObject
 		Vector3 toCam = camNode.position - node.position;
 		float range = toCam.length;
 		
-		if (range < 10.) node.position -= (node.position - camNode.position) * 4. * timeStep;
+		if (range < 10.) node.position -= (node.position - camNode.position) * 16. * timeStep;
 		
 		if (range < 2.)
 		{
+			jetpack@ player2 = cast<jetpack>(camNode.GetScriptObject("jetpack"));
+			player2.PlaySound("Sounds/pickup.wav");
+			
 			crystals ++; 
 			numcrystals --;
 			node.Remove();
@@ -754,7 +824,7 @@ class dolboshka : ScriptObject
 			node.Rotate(rotded);
 			dedtmr -= timeStep;
 			
-			worldAnim += 5. * timeStep;
+			worldAnim += 8. * timeStep;
 			//updateWorld(worldPhase,worldAnim);
 			
 			if (dedtmr<0.)
@@ -888,7 +958,7 @@ class zloboshka : ScriptObject
 			node.Rotate(rotded);
 			dedtmr -= timeStep;
 			
-			worldAnim += 15. * timeStep;
+			//worldAnim += 15. * timeStep;
 			//updateWorld(worldPhase,worldAnim);
 			
 			if (dedtmr<0.)
@@ -934,6 +1004,7 @@ class zloboshka : ScriptObject
 			if (range<4.)
 			{
 				camVel += ((camNode.position - node.position)+Vector3(0,0.1,0)) * 400. * timeStep;
+				health -= 200 * timeStep;
 			}
 		
 		
