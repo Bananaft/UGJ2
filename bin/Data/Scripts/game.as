@@ -17,6 +17,7 @@ Vector3 camVel = Vector3(0.,0.,0.);
 
 bool bmenu = false;
 bool blvl = false;
+bool bdebrif = false;
 int ilvl = 0;
 int dlbtogo;
 int lvlphase;
@@ -88,6 +89,15 @@ void setupMenu()
     menuObj.Init();
 }
 
+void setupDebrif()
+{
+	ui.Clear();
+		
+	Node@ dNode = scene_.CreateChild("dNode");
+	debrief@ dObj = cast<debrief>(dNode.CreateScriptObject(scriptFile, "debrief"));
+    dObj.Init();
+}
+
 void startLevel(int lvl)
 {
 	setupLevel(lvl);
@@ -109,6 +119,10 @@ void setupLevel(int lvl)
 	 worldPhaseSpeed = 5.0;
 	 worldAnimSpeed = 0.0;
 	 crystals = 0;
+	 
+	lavaLevel = -400;
+	lavaTLevel = -400;
+	lavaSpeed = 0;
 	fuel = 20;
 	health = 100;
 	 numcrystals = 0;
@@ -239,26 +253,10 @@ void setupLevel(int lvl)
 	
 	ui.root.AddChild(screen2);
 	
-	UIElement@ LegendNode = ui.root.CreateChild("UIElement");
-	LegendNode.SetPosition(200 , 10);
-	LegendNode.horizontalAlignment = HA_LEFT;
-	LegendNode.verticalAlignment = VA_TOP;
-	
-	Text@ helpText = LegendNode.CreateChild("Text");
-	helpText.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 10);
-	helpText.horizontalAlignment = HA_LEFT;
-	helpText.verticalAlignment = VA_TOP;
-	helpText.SetPosition(0,0);
-	helpText.color = Color(1,1,0.5);;
-	helpText.text =
-					"Hello! \n"
-					"F2 - show profiler \n"
-					"F12 - take screenshot \n\n";
-					
-	
+
 	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
-	lvlphase = 9;
+	lvlphase = 1;
 		
 	lavaNode = scene_.CreateChild("lavaNode");
 	lavaNode.position = Vector3(0,-40,0);
@@ -655,6 +653,12 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
 		if (ilvl == 2) spawnCrystls = true;
 	}
 	
+	if (bdebrif){
+		scene_.RemoveAllChildren();
+		setupDebrif();
+		bdebrif = false;
+	}
+	
 }
 	
 void HandleKeyDown(StringHash eventType, VariantMap& eventData)
@@ -912,7 +916,7 @@ void Update(float timeStep)
 			{
 				spawnCrystal(exCpos1);
 				
-				log.Info(exCpos1.y);
+				//log.Info(exCpos1.y);
 			}
 			//log.Info(node.position.y);
 			
@@ -1000,11 +1004,11 @@ void Update(float timeStep)
 		{
 			
 			Vector2 prane = portalpos - Vector2(camNode.position.x, camNode.position.z);
-			log.Info(prane.length);
+			//log.Info(prane.length);
 			float prange = prane.length;
 			if (prange < 5.0)
 			{
-				bmenu = true;
+				bdebrif = true;
 				node.RemoveAllComponents();
 			}
 			
@@ -1443,9 +1447,9 @@ class intro : ScriptObject
 class menu : ScriptObject
 {	
 	Sprite@ lv1;
-	Sprite@ lv2;
+	//Sprite@ lv2;
 	
-	Vector2 lv1pos = Vector2(-400,0.);
+	Vector2 lv1pos = Vector2(0,-200.);
 	Vector2 lv2pos = Vector2(400,0.);
 	
 	Sprite@ cur;
@@ -1465,7 +1469,7 @@ class menu : ScriptObject
 		lv1.horizontalAlignment = HA_CENTER;
 		
 		ui.root.AddChild(lv1);
-		
+		/*
 		Texture2D@ lv2Tex = cache.GetResource("Texture2D", "Textures/lv2.png");
 		lv2Tex.filterMode = FILTER_NEAREST;
 
@@ -1478,7 +1482,7 @@ class menu : ScriptObject
 		lv2.horizontalAlignment = HA_CENTER;
 		
 		ui.root.AddChild(lv2);
-		
+		*/
 		Texture2D@ curTex = cache.GetResource("Texture2D", "Textures/cur.png");
 		
 
@@ -1491,6 +1495,7 @@ class menu : ScriptObject
 		cur.horizontalAlignment = HA_CENTER;
 		cur.opacity = 0.99;
 		ui.root.AddChild(cur);
+		cur.position = Vector2(500,200);
 		
 	}
 	
@@ -1505,7 +1510,7 @@ class menu : ScriptObject
 		if (cur.position.y < -graphics.height/2.1) cur.position += Vector2(0., -cur.position.y - graphics.height/2.1);
 		
 		Vector2 lv1l = lv1.position - cur.position;
-		Vector2 lv2l = lv2.position - cur.position;
+		//Vector2 lv2l = lv2.position - cur.position;
 		
 		if (lv1l.length<200)
 		{
@@ -1517,7 +1522,7 @@ class menu : ScriptObject
 			}
 			
 		} else lv1.position = lv1pos;
-		
+		/*
 		if (lv2l.length<200)
 		{
 			lv2.position = lv2pos + (Vector2(10 * Sin(time.elapsedTime * 9000),10 * Sin(time.elapsedTime * 792.222)));
@@ -1528,9 +1533,43 @@ class menu : ScriptObject
 			}
 			
 		} else lv2.position = lv2pos;
-		
+		*/
 		if (input.keyPress[KEY_ESCAPE] && noext) engine.Exit();
 		noext = true;
+	}
+	
+}
+
+class debrief : ScriptObject
+{	
+	void Init()
+    {
+		
+		UIElement@ LegendNode = ui.root.CreateChild("UIElement");
+		LegendNode.SetPosition(0 , -150);
+		LegendNode.horizontalAlignment = HA_CENTER;
+		LegendNode.verticalAlignment = VA_CENTER;
+		
+		Text@ helpText = LegendNode.CreateChild("Text");
+		helpText.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 10);
+		//helpText.horizontalAlignment = HA_LEFT;
+		//helpText.verticalAlignment = VA_TOP;
+		helpText.SetPosition(0,0);
+		helpText.color = Color(1,1,0.5);;
+		helpText.text =
+						"Поздравляем! \n"
+						"Ты всех победил! \n"
+						"Молодец! \n\n";
+	}
+	void Update(float timeStep)
+	{
+		if (input.keyPress[KEY_SPACE] || input.mouseButtonPress[MOUSEB_LEFT])
+		{
+			ui.Clear();
+			setupMenu();
+			self.Remove();
+			
+		}
 	}
 	
 }
