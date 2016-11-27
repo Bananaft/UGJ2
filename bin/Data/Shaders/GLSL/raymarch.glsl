@@ -8,6 +8,7 @@
 //#define gl_FragData fragData
 
 uniform float cRAY_STEPS;
+uniform vec3 cFOGCOL;
 
 varying vec2 vScreenPos;
 //varying vec3 direction;
@@ -126,7 +127,7 @@ void PS()
 
   //gl_FragColor = vec4(ambient , 1.0);
   #ifndef PREMARCH
-    gl_FragData[0] = vec4(mix(col,vec3(0.8),fog),0.);//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
+    gl_FragData[0] = vec4(mix(col,cFOGCOL,fog),0.);//vec4(vec3(0.3) * (1.-fog),1.0); //distance.r * 0.2
     gl_FragData[1] = vec4(1.5);
     //gl_FragData[0] = vec4(float(stps)/256,0.,0.,0.);//vec4(float(stps)/cRAY_STEPS,0.,0.,0.);//vec4(mimus , plus,0.,0.); //vec4(vec3(0.3) * (1.-fog),1.0);
     //gl_FragData[1] = vec4(0.);//vec4(diffColor.rgb * fog, 1.7 );

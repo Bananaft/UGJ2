@@ -15,6 +15,7 @@
         <output index="1" name="albedo" />
         <output index="2" name="normal" />
         <output index="3" name="depth" />
+        <parameter name="FOGCOL" value="0.8 0.8 0.8" />
     </command>
 
     <command type="quad" tag="premarch" vs="raymarch" ps="raymarch" psdefines="PREMARCH" output="depth3">
@@ -53,6 +54,7 @@
       <parameter name="ANIM" value="0" />
       <parameter name="PHASE" value="0" />
       <parameter name="PPOS" value="0 0 0" />
+      <parameter name="FOGCOL" value="0.8 0.8 0.8" />
     </command>
 
     <command type="lightvolumes" vs="DeferredLight" ps="DeferredLight" >

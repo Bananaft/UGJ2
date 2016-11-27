@@ -137,7 +137,7 @@ float sdfmap(vec3 pos)
 
 	#ifdef PORTAL
 		vec2 cp = pos.xz;
-		float cone = length((cp-cPPOS.xy))-120.;
+		float cone = length((cp-cPPOS.xy))-cPPOS.z;
 		dist = max(dist,cone);
 	#endif
 
