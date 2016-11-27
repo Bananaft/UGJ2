@@ -385,6 +385,7 @@ void switchPhase()
 	
 	if (ilvl == 1)
 	{
+		jetpack@ player2 = cast<jetpack>(camNode.GetScriptObject("jetpack"));
 			
 		if (lvlphase == 2)
 		{
@@ -392,6 +393,8 @@ void switchPhase()
 			spawnDolboshka(cpos + Vector3(-50.,2.,0.),5.);
 			dlbtogo = 2;
 			worldTPhase = 25.;
+			
+			player2.PlaySound("Sounds/dl_2.wav");
 		}
 		
 		else if (lvlphase == 3)
@@ -401,6 +404,8 @@ void switchPhase()
 			spawnDolboshka(cpos + Vector3(0.,1.,150.),12.);
 			dlbtogo = 3;
 			worldTPhase = 35.;
+			
+			player2.PlaySound("Sounds/dl_3.wav");
 		}	
 		
 		else if (lvlphase == 4)
@@ -420,6 +425,8 @@ void switchPhase()
 			renderpath.shaderParameters["FOGCOL"] = Variant(Vector3(0.06,0.25,0.3));
 
 			rttViewport.renderPath = renderpath;
+			
+			player2.PlaySound("Sounds/dl_4.wav");
 		}
 		
 		else if (lvlphase == 5)
@@ -435,6 +442,9 @@ void switchPhase()
 			dlbtogo = 3;
 			worldTPhase = 80.;
 			worldAnimSpeed = 0.2;
+			
+			
+			player2.PlaySound("Sounds/dl_5.wav");
 		}
 		else if (lvlphase == 6)
 		{
@@ -445,6 +455,9 @@ void switchPhase()
 			renderpath.shaderParameters["FOGCOL"] = Variant(Vector3(0.7,0.8,0.9));
 
 			rttViewport.renderPath = renderpath;
+			
+			
+			player2.PlaySound("Sounds/dl_6.wav");
 		}
 		else if (lvlphase == 7)
 		{
@@ -465,6 +478,9 @@ void switchPhase()
 			renderpath.shaderParameters["FOGCOL"] = Variant(Vector3(0.9,0.6,0.6));
 
 			rttViewport.renderPath = renderpath;
+			
+			
+			player2.PlaySound("Sounds/dl_7.wav");
 		}
 		
 		else if (lvlphase == 8)
@@ -510,12 +526,18 @@ void switchPhase()
 			renderpath.shaderParameters["FOGCOL"] = Variant(Vector3(0.8,0.65,0.6));
 
 			rttViewport.renderPath = renderpath;
+			
+			
+			player2.PlaySound("Sounds/dl_8.wav");
 		}
 		else if (lvlphase == 9)
 		{
 			spawnDolboshka(cpos + Vector3(50.,80.,0.),5.);
 			
 			dlbtogo = 1;
+			
+			
+			player2.PlaySound("Sounds/dl_9.wav");
 		}
 		
 		else if (lvlphase == 10)
@@ -584,6 +606,9 @@ void switchPhase()
 			renderpath.shaderParameters["FOGCOL"] = Variant(Vector3(0.4,0.7,0.6));
 
 			rttViewport.renderPath = renderpath;
+			
+			
+			player2.PlaySound("Sounds/dl_10.wav");
 			
 		}
 	} else if (ilvl == 2)
