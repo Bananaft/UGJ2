@@ -1326,6 +1326,7 @@ class intro : ScriptObject
 	Sprite@ splash;
 	Sprite@ splash2;
 	Sprite@ story;
+	bool playing = false;
 	
 	void Init()
     {
@@ -1393,11 +1394,17 @@ class intro : ScriptObject
 		if (7.<time.elapsedTime && time.elapsedTime<8.)
 		{
 			story.opacity = time.elapsedTime-7.;
+			if(playing == false)
+			{
+				PlaySound("Sounds/story.wav");
+				playing = true;
+			}
+			
 		}
 				
 		if (7.<time.elapsedTime)
 		{
-			story.position = Vector2(0. , story.position.y - 25.*timeStep);
+			story.position = Vector2(0. , story.position.y - 32.*timeStep);
 		}
 		
 		if (input.keyPress[KEY_SPACE] || input.mouseButtonPress[MOUSEB_LEFT])
@@ -1409,6 +1416,27 @@ class intro : ScriptObject
 		}
 		
 	}
+	
+	void PlaySound(const String&in soundName)
+    {
+        SoundSource@ source = node.CreateComponent("SoundSource");
+        Sound@ sound = cache.GetResource("Sound", soundName);
+        // Subscribe to sound finished for cleaning up the source
+        SubscribeToEvent(node, "SoundFinished", "HandleSoundFinished");
+
+        //source.SetDistanceAttenuation(2, 50, 1);
+        source.Play(sound);
+    }
+    
+    void HandleSoundFinished(StringHash eventType, VariantMap& eventData)
+    {
+        SoundSource@ source = eventData["SoundSource"].GetPtr();
+        source.Remove();
+		
+		ui.Clear();
+		setupMenu();
+		self.Remove();
+    }
 
 }
 
