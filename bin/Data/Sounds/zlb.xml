@@ -1,0 +1,4 @@
+<sound>
+	<format frequency="44100"/>
+	<loop enable="true" />
+</sound>

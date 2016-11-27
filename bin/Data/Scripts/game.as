@@ -41,6 +41,7 @@ float maxhealth = 100.;
 float lavaLevel = -400;
 float lavaTLevel = -400;
 float lavaSpeed = 0;
+float paingain = 0.;
 
 Node@ lavaNode;
 
@@ -420,10 +421,10 @@ void switchPhase()
 			
 			dlbtogo = 3;
 			worldTPhase = 160.;
-			worldPhaseSpeed = 0.1;
-			lavaLevel = -50;
+			worldPhaseSpeed = 0.2;
+			lavaLevel = -35;
 			lavaTLevel = 0;
-			lavaSpeed = 0.5;
+			lavaSpeed = 0.6;
 		}
 		
 		else if (lvlphase == 8)
@@ -458,9 +459,9 @@ void switchPhase()
 			
 			renderpath = logVpt.renderPath.Clone();
 			
-			rpc = renderpath.commands[1];
+			rpc = renderpath.commands[0];
 			rpc.pixelShaderDefines = "DEFERRED LV2";
-			renderpath.commands[1] = rpc;
+			renderpath.commands[0] = rpc;
 			logVpt.renderPath = renderpath;
 		}
 	} else if (ilvl == 2)
@@ -553,6 +554,8 @@ float roll = 0.0f;
 SoundSource@ noise;
 SoundSource@ walk;
 SoundSource@ jet;
+SoundSource@ pain;
+SoundSource@ heal;
 
 Vector3 exCpos1;
 
@@ -574,6 +577,16 @@ void Init()
 		Sound@ jsound = cache.GetResource("Sound", "Sounds/jet.wav");
 		jet.Play(jsound);
 		jet.gain = 0.0f;
+		
+		pain = node.CreateComponent("SoundSource");
+		Sound@ psound = cache.GetResource("Sound", "Sounds/pain.wav");
+		pain.Play(psound);
+		pain.gain = paingain;
+		
+		heal = node.CreateComponent("SoundSource");
+		Sound@ hsound = cache.GetResource("Sound", "Sounds/heal.wav");
+		heal.Play(hsound);
+		heal.gain = 0.0;
     }
 
 void Update(float timeStep)
@@ -581,6 +594,10 @@ void Update(float timeStep)
         // Do not move if the UI has a focused element (the console)
         //if (ui.focusElement !is null)
           //  return;
+		pain.gain = Min(paingain,1.);
+		paingain  -= timeStep*2;
+		paingain = Max(paingain,0.);
+		
         Camera@ cam = node.GetComponent("camera");
         // Movement speed as world units per second
         float MOVE_SPEED = 20.;
@@ -672,7 +689,10 @@ void Update(float timeStep)
 				
 				if (normal.z>trs)camVel.z *= -1;// Max(camVel.z,0.);
 				else if (normal.z<-trs)camVel.z *= -1;// Min(camVel.z,0.);*/
-				if (dist<0.05) health -= 25 * timeStep;
+				if (dist<0.05){
+					health -= 25 * timeStep;
+					paingain = 1.;
+				}
 			
 			}
 			
@@ -775,8 +795,8 @@ void Update(float timeStep)
 		
 		updateWorld(worldPhase,worldAnim);
 		
-		log.Info(numcrystals);
-		log.Info(crystals);
+		//log.Info(numcrystals);
+		//log.Info(crystals);
 		
 		if (lvlphase == 6 && crystals>6)
 		{
@@ -792,8 +812,15 @@ void Update(float timeStep)
 		fuel = Clamp(fuel,0,maxfuel);
 		
 		healthSprite.size = IntVector2(health / maxhealth * gres.x * 2.,16);
-		if (health<maxhealth)
+		if (health<maxhealth && 5.-camVel.length>0. && 1-dist > 0.)
+		{
 			health += (1-dist) * Max(5.-camVel.length,0.) * 10 * timeStep;
+			heal.gain = 0.35;
+			
+		} else {
+			heal.gain = 0.;
+		}
+			
 			
 		health = Min(health,maxhealth);
 		
@@ -805,6 +832,7 @@ void Update(float timeStep)
 			node.position = Vector3(node.position.x,lavaLevel + 0.2,node.position.z);
 			camVel *= 0.94;
 			health -= 10 * timeStep;
+			paingain = 1.;
 		}
     }
 	
@@ -882,6 +910,7 @@ class dolboshka : ScriptObject
 		Sound@ ghoul = cache.GetResource("Sound", "Sounds/ghoul.wav");
 		zlbsnd.Play(ghoul);
 		zlbsnd.farDistance = 80.;
+		
     }
 	
 	void Update(float timeStep)
@@ -999,9 +1028,10 @@ class zloboshka : ScriptObject
         bhvr = Vector3(10 + Random(50),-5 + Random(300),10 + Random(50));
 		
 		SoundSource3D@ zlbsnd = node.CreateComponent("SoundSource3D");
-		Sound@ ghoul = cache.GetResource("Sound", "Sounds/ghoul.wav");
+		Sound@ ghoul = cache.GetResource("Sound", "Sounds/zlb.wav");
 		zlbsnd.Play(ghoul);
-		zlbsnd.farDistance = 80.;
+		zlbsnd.farDistance = 40.;
+
     }
 	
 	void Update(float timeStep)
@@ -1089,6 +1119,7 @@ class zloboshka : ScriptObject
 			{
 				camVel += ((camNode.position - node.position)+Vector3(0,0.1,0)) * 400. * timeStep;
 				health -= 200 * timeStep;
+				paingain = 4.;
 			}
 		
 		

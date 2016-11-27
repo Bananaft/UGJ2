@@ -1,0 +1,71 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="rrrabndaaa_data" version="1.3.0" audacityversion="2.0.6" sel0="0.3686167800" sel1="0.3686167800" vpos="112" h="0.0000000000" zoom="344.5312500000" rate="44100.0" snapto="off" selectionformat="чч:мм:сс + миллисекунды">
+	<tags/>
+	<wavetrack name="Звуковая дорожка" channel="2" linked="0" mute="1" solo="0" height="148" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="729600">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000005.au" len="262144" min="-1.0" max="0.999969" rms="0.172258"/>
+				</waveblock>
+				<waveblock start="262144">
+					<simpleblockfile filename="e0000904.au" len="262144" min="-0.999664" max="0.990479" rms="0.212931"/>
+				</waveblock>
+				<waveblock start="524288">
+					<simpleblockfile filename="e0000601.au" len="205312" min="-1.0" max="0.997772" rms="0.084631"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Звуковая дорожка" channel="2" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="142810">
+				<waveblock start="0">
+					<simpleblockfile filename="e00001e0.au" len="142810" min="-0.66417" max="0.780928" rms="0.148518"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Звуковая дорожка" channel="2" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="0.501187" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="80782">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000347.au" len="80782" min="-0.321272" max="0.239601" rms="0.096817"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Звуковая дорожка" channel="2" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="0.794328" pan="0.0">
+		<waveclip offset="1.34707483">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="21376">
+				<waveblock start="0">
+					<simpleblockfile filename="e00006ec.au" len="21376" min="-1.013031" max="1.00563" rms="0.180488"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Звуковая дорожка" channel="2" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="0.794328" pan="0.0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="28224">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000a3c.au" len="28224" min="-1.003259" max="0.982499" rms="0.14535"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Звуковая дорожка" channel="2" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="0.794328" pan="0.0">
+		<waveclip offset="0.36861678">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="49600">
+				<waveblock start="0">
+					<simpleblockfile filename="e00007ed.au" len="49600" min="-1.013031" max="1.00563" rms="0.231649"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
