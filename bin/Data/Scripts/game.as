@@ -38,6 +38,12 @@ Sprite@ healthSprite;
 float health;
 float maxhealth = 100.;
 
+float lavaLevel = -400;
+float lavaTLevel = -400;
+float lavaSpeed = 0;
+
+Node@ lavaNode;
+
 void Start()
 {
 	cache.autoReloadResources = true;
@@ -246,7 +252,15 @@ void setupLevel(int lvl)
 	dlbtogo = 1;
 	lvlphase = 1;
 		
-		
+	lavaNode = scene_.CreateChild("lavaNode");
+	lavaNode.position = Vector3(0,-40,0);
+	lavaNode.scale = Vector3(300,0,300);
+	StaticModel@ lavamodel = lavaNode.CreateComponent("StaticModel");
+	lavamodel.model = cache.GetResource("Model", "Models/plane.mdl");
+	
+	Material@ lavamat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	lavamodel.material = lavamat;
+	
 	
 
 }
@@ -358,7 +372,7 @@ void switchPhase()
 			worldTPhase = 25.;
 		}
 		
-		if (lvlphase == 3)
+		else if (lvlphase == 3)
 		{
 			spawnDolboshka(cpos + Vector3(150.,1.,0.),12.);
 			spawnDolboshka(cpos + Vector3(-150.,1.,0.),12.);
@@ -367,7 +381,7 @@ void switchPhase()
 			worldTPhase = 35.;
 		}	
 		
-		if (lvlphase == 4)
+		else if (lvlphase == 4)
 		{
 			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
 			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
@@ -380,7 +394,7 @@ void switchPhase()
 			worldPhaseSpeed = 1.;
 		}
 		
-		if (lvlphase == 5)
+		else if (lvlphase == 5)
 		{
 			//spawnZloboshka(cpos + Vector3(50.,-9.,0.),15.);
 			//spawnZloboshka(cpos + Vector3(-50.,-7.,0.),15.);
@@ -394,9 +408,60 @@ void switchPhase()
 			worldTPhase = 80.;
 			worldAnimSpeed = 0.2;
 		}
-		if (lvlphase == 6)
+		else if (lvlphase == 6)
 		{
 			spawnCrystls = true;
+		}
+		else if (lvlphase == 7)
+		{
+			spawnDolboshka(cpos + Vector3(50.,25.,15.),10.);
+			spawnDolboshka(cpos + Vector3(-50.,30.,15.),10.);
+			spawnDolboshka(cpos + Vector3(0.,35.,50.),10.);
+			
+			dlbtogo = 3;
+			worldTPhase = 160.;
+			worldPhaseSpeed = 0.1;
+			lavaLevel = -50;
+			lavaTLevel = 0;
+			lavaSpeed = 0.5;
+		}
+		
+		else if (lvlphase == 8)
+		{
+			//spawnDolboshka(cpos + Vector3(50.,25.,15.),10.);
+			//spawnDolboshka(cpos + Vector3(-50.,30.,15.),10.);
+			//spawnDolboshka(cpos + Vector3(0.,35.,50.),10.);
+			
+			//dlbtogo = 3;
+			//worldTPhase = 160.;
+			//worldPhaseSpeed = 0.1;
+			lavaLevel = -400;
+			lavaTLevel = -400;
+			lavaSpeed = 0.0;
+			
+			
+			RenderPath@ renderpath = rttViewport.renderPath.Clone();
+			RenderPathCommand rpc;
+			
+			camNode.position = Vector3( 40,60,40);
+			
+			for (int i=3; i<6; i++)
+			{
+				rpc = renderpath.commands[i];
+				rpc.pixelShaderDefines = "PREMARCH FCTYP LV2";
+				renderpath.commands[i] = rpc;
+			}
+			rpc = renderpath.commands[6];
+			rpc.pixelShaderDefines = "DEFERRED FCTYP LV2";
+			renderpath.commands[6] = rpc;
+			rttViewport.renderPath = renderpath;
+			
+			renderpath = logVpt.renderPath.Clone();
+			
+			rpc = renderpath.commands[1];
+			rpc.pixelShaderDefines = "DEFERRED LV2";
+			renderpath.commands[1] = rpc;
+			logVpt.renderPath = renderpath;
 		}
 	} else if (ilvl == 2)
 	{
@@ -705,10 +770,19 @@ void Update(float timeStep)
 		if (worldPhase<worldTPhase) worldPhase += worldPhaseSpeed * timeStep;
 		worldAnim += worldAnimSpeed * timeStep;
 		
+		if (lavaLevel<lavaTLevel-0.2) lavaLevel += lavaSpeed * timeStep;
+		if (lavaLevel>lavaTLevel+0.2) lavaLevel -= lavaSpeed * timeStep;
+		
 		updateWorld(worldPhase,worldAnim);
 		
 		log.Info(numcrystals);
 		log.Info(crystals);
+		
+		if (lvlphase == 6 && crystals>6)
+		{
+			lvlphase ++;
+			switchPhase();
+		}
 		
 		
 		fuelSprite.size = IntVector2(fuel/maxfuel * gres.x * 2.,16);
@@ -722,6 +796,16 @@ void Update(float timeStep)
 			health += (1-dist) * Max(5.-camVel.length,0.) * 10 * timeStep;
 			
 		health = Min(health,maxhealth);
+		
+		lavaNode.position = Vector3(camNode.position.x,lavaLevel,camNode.position.z);
+		
+		if (node.position.y - 0.2 < lavaLevel)
+		{
+			camVel = Vector3(camVel.x,Max(camVel.y,0.),camVel.z);
+			node.position = Vector3(node.position.x,lavaLevel + 0.2,node.position.z);
+			camVel *= 0.94;
+			health -= 10 * timeStep;
+		}
     }
 	
 	void PlaySound(const String&in soundName)
