@@ -42,8 +42,15 @@ float lavaLevel = -400;
 float lavaTLevel = -400;
 float lavaSpeed = 0;
 float paingain = 0.;
+int crystalstogo = 25;
+
+bool portal = false;
+Vector2 portalspeed;
+Vector2 portalpos;
+Node@ portalNode;
 
 Node@ lavaNode;
+float worldded = 180;
 
 void Start()
 {
@@ -251,7 +258,7 @@ void setupLevel(int lvl)
 	
 	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
-	lvlphase = 1;
+	lvlphase = 9;
 		
 	lavaNode = scene_.CreateChild("lavaNode");
 	lavaNode.position = Vector3(0,-40,0);
@@ -323,12 +330,24 @@ void updateWorld (float wphase, float wanim)
 	RenderPathCommand rpc;
 	renderpath.shaderParameters["ANIM"] = wanim;
 	renderpath.shaderParameters["PHASE"] = wphase;
+	
+	if (portal)
+	{
+		Vector3 ppos = Vector3(portalpos.x,portalpos.y, worldded);
+		renderpath.shaderParameters["PPOS"] = Variant(ppos);
+	}
 	rttViewport.renderPath = renderpath;
 	
 	renderpath = logVpt.renderPath.Clone();
 	
 	renderpath.shaderParameters["ANIM"] = wanim;
 	renderpath.shaderParameters["PHASE"] = wphase;
+	
+	if (portal)
+	{
+		Vector3 ppos = Vector3(portalpos.x,portalpos.y, worldded);
+		renderpath.shaderParameters["PPOS"] = Variant(ppos);
+	}
 
 	logVpt.renderPath = renderpath;
 }
@@ -425,6 +444,7 @@ void switchPhase()
 			lavaLevel = -35;
 			lavaTLevel = 0;
 			lavaSpeed = 0.6;
+			spawnCrystls = false;
 		}
 		
 		else if (lvlphase == 8)
@@ -439,7 +459,8 @@ void switchPhase()
 			lavaLevel = -400;
 			lavaTLevel = -400;
 			lavaSpeed = 0.0;
-			
+			spawnCrystls = true;
+			crystalstogo = crystals;
 			
 			RenderPath@ renderpath = rttViewport.renderPath.Clone();
 			RenderPathCommand rpc;
@@ -463,6 +484,76 @@ void switchPhase()
 			rpc.pixelShaderDefines = "DEFERRED LV2";
 			renderpath.commands[0] = rpc;
 			logVpt.renderPath = renderpath;
+		}
+		else if (lvlphase == 9)
+		{
+			spawnDolboshka(cpos + Vector3(50.,80.,0.),5.);
+			
+			dlbtogo = 1;
+		}
+		
+		else if (lvlphase == 10)
+		{
+
+			/*
+			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
+			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
+			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
+			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
+			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
+			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
+*/
+			
+			lavaLevel = -30;
+			lavaTLevel = -30;
+			
+			worldPhase = 250;
+			worldTPhase = 250;
+			worldAnimSpeed = 2.;
+			spawnCrystls = false;
+			
+			RenderPath@ renderpath = rttViewport.renderPath.Clone();
+			RenderPathCommand rpc;
+			
+			camNode.position = Vector3( 0,60,0);
+			
+			for (int i=3; i<6; i++)
+			{
+				rpc = renderpath.commands[i];
+				rpc.pixelShaderDefines = "PREMARCH PORTAL";
+				renderpath.commands[i] = rpc;
+			}
+			rpc = renderpath.commands[6];
+			rpc.pixelShaderDefines = "DEFERRED PORTAL";
+			renderpath.commands[6] = rpc;
+			rttViewport.renderPath = renderpath;
+			
+			renderpath = logVpt.renderPath.Clone();
+			
+			rpc = renderpath.commands[0];
+			rpc.pixelShaderDefines = "DEFERRED PORTAL";
+			renderpath.commands[0] = rpc;
+			logVpt.renderPath = renderpath;
+			
+			portal = true;
+			portalNode = scene_.CreateChild("portalNode");
+			
+			portalNode.scale = Vector3(10,500,10);
+			StaticModel@ portalmodel = portalNode.CreateComponent("StaticModel");
+			portalmodel.model = cache.GetResource("Model", "Models/cylinder.mdl");
+			
+			Material@ prtmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+			portalmodel.material = prtmat;
+			
+			Vector3 ppos = camNode.rotation * Vector3(0.,0.,1.);
+			Vector2 pp = Vector2(ppos.x,ppos.z);
+			pp.Normalize();
+			portalspeed = pp;
+			pp *= 100;
+			pp += Vector2(camNode.position.x,camNode.position.z);
+			portalpos = pp;
+			
+			
 		}
 	} else if (ilvl == 2)
 	{
@@ -646,6 +737,7 @@ void Update(float timeStep)
 	
 		camVel.y -= 9.8 * time.timeStep;
 		camNode.position += camVel * time.timeStep;
+		if  (input.keyPress[KEY_C]) spawnCrystal(node.position);
 		
 		if (input.keyDown[KEY_SPACE] && fuel > 0.)
 		{
@@ -757,7 +849,7 @@ void Update(float timeStep)
 			{
 				spawnCrystal(exCpos1);
 				
-				//log.Info("pew!");
+				log.Info(exCpos1.y);
 			}
 			//log.Info(node.position.y);
 			
@@ -767,11 +859,12 @@ void Update(float timeStep)
 			csdir = csrot * csdir;
 			csdir.Normalize();
 			csdir *= 150;
-			if (ilvl == 1)
-			csdir.y = -20.-Random(30.);
-			else
-			csdir.y = 30 + Random(20.);
 			
+			if (lvlphase == 8)
+			csdir.y = 30 + Random(20.);
+			else
+			csdir.y = -20.-Random(30.);
+	
 			RenderPath@ renderpath = logVpt.renderPath.Clone();
 			
 			Vector3 checkVec = Vector3(node.position.x,0.,node.position.z);
@@ -804,6 +897,11 @@ void Update(float timeStep)
 			switchPhase();
 		}
 		
+		if (lvlphase == 8 && crystals>crystalstogo+2)
+		{
+			lvlphase ++;
+			switchPhase();
+		}
 		
 		fuelSprite.size = IntVector2(fuel/maxfuel * gres.x * 2.,16);
 		if (fuel<maxfuel)
@@ -833,6 +931,15 @@ void Update(float timeStep)
 			camVel *= 0.94;
 			health -= 10 * timeStep;
 			paingain = 1.;
+		}
+		
+		if (portal)
+		{
+			portalNode.position = Vector3(portalpos.x,camNode.position.y,portalpos.y);
+			portalpos += portalspeed * 17. * timeStep;
+			Quaternion qt;
+			qt.FromEulerAngles(0.,120*timeStep,0.);
+			portalNode.Rotate(qt);
 		}
     }
 	

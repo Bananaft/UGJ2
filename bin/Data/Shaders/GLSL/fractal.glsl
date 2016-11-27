@@ -1,5 +1,6 @@
 uniform float cANIM;
 uniform float cPHASE;
+uniform vec3 cPPOS;
 
 float hash(float h) {
 	return fract(sin(h) * 43758.5453123);
@@ -133,5 +134,12 @@ float sdfmap(vec3 pos)
 		//dist = 0.8 * dist - ( 0.5 - cav) * 1.25;
 		//dist = dist + .75 + (1.5-sf * 2.);;
 	#endif
+
+	#ifdef PORTAL
+		vec2 cp = pos.xz;
+		float cone = length((cp-cPPOS.xy))-120.;
+		dist = max(dist,cone);
+	#endif
+
   return dist;
 }
