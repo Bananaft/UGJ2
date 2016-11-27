@@ -258,7 +258,7 @@ void setupLevel(int lvl)
 	
 	spawnDolboshka(Vector3(0.,3.,0.),0.);
 	dlbtogo = 1;
-	lvlphase = 1;
+	lvlphase = 9;
 		
 	lavaNode = scene_.CreateChild("lavaNode");
 	lavaNode.position = Vector3(0,-40,0);
@@ -705,6 +705,7 @@ SoundSource@ pain;
 SoundSource@ heal;
 
 Vector3 exCpos1;
+bool hack72 = false;
 
 void Init()
     {
@@ -899,6 +900,12 @@ void Update(float timeStep)
 				px2 = img.GetPixel(i,u);
 				log.Info(String(i));
 			}	*/
+		if (lvlphase == 7 && camNode.position.y > 70. && hack72 == false)
+		{
+			PlaySound("Sounds/dl_7_2.wav");
+			hack72 = true;
+		}
+			
 		if (spawnCrystls)
 		{
 			if (px.r < 0.6 && px.r > 0.1 && numcrystals<40)
@@ -991,19 +998,31 @@ void Update(float timeStep)
 		
 		if (portal)
 		{
+			
+			Vector2 prane = portalpos - Vector2(camNode.position.x, camNode.position.z);
+			log.Info(prane.length);
+			float prange = prane.length;
+			if (prange < 5.0)
+			{
+				bmenu = true;
+				node.RemoveAllComponents();
+			}
+			
 			portalNode.position = Vector3(portalpos.x,200.,portalpos.y);
-			portalpos += portalspeed * 17. * timeStep;
+			float pspeed = 16.8;
+			if (prange > worldded)
+			{
+				pspeed = 5.;
+			}
+			
+			portalpos += portalspeed * pspeed * timeStep;
 			Quaternion qt;
 			qt.FromEulerAngles(0.,120*timeStep,0.);
 			portalNode.Rotate(qt);
 			worldded -= 2 * timeStep;
 			
-			Vector3 prane = portalNode.position - node.position;
-			if (prane.length<5.0)
-			{
-				bmenu = true;
-				node.RemoveAllComponents();
-			}
+			
+			
 		}
     }
 	
