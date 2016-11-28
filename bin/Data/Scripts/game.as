@@ -434,7 +434,7 @@ void switchPhase()
 			spawnZloboshka(cpos + Vector3(150.,-9.,0.),15.);
 			spawnZloboshka(cpos + Vector3(-150.,-7.,0.),15.);
 			spawnDolboshka(cpos + Vector3(50.,-5.,15.),15.);
-			spawnDolboshka(cpos + Vector3(-50.,-10.,15.),15.);
+			spawnDolboshka(cpos + Vector3(-50.,0.,15.),15.);
 			spawnDolboshka(cpos + Vector3(0.,7.,50.),15.);
 			//spawnCrystls = true;
 			dlbtogo = 3;
