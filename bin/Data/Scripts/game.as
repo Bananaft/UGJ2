@@ -1490,11 +1490,11 @@ class menu : ScriptObject
 		ui.root.AddChild(lv2);
 		*/
 		Texture2D@ curTex = cache.GetResource("Texture2D", "Textures/cur.png");
-		
+		curTex.filterMode = FILTER_NEAREST;
 
 		cur = Sprite();
 		cur.texture = curTex;
-		cur.size = IntVector2(64,64);
+		cur.size = IntVector2(512,512);
 		//cur.hotSpot = IntVector2(128, 128);
 		
 		cur.verticalAlignment = VA_CENTER;
