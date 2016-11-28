@@ -312,9 +312,9 @@ void spawnCrystal(Vector3 pos)
 	dlbnNode.position = pos;
 	//dolboshka@ dlb = cast<dolboshka>(dlbnNode.CreateScriptObject(scriptFile, "dolboshka"));
 	StaticModel@ dlbmodel = dlbnNode.CreateComponent("StaticModel");
-	dlbmodel.model = cache.GetResource("Model", "Models/Mushroom.mdl");
+	dlbmodel.model = cache.GetResource("Model", "Models/crystal.mdl");
 	
-	Material@ dlbmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	Material@ dlbmat = cache.GetResource("Material", "Materials/crs.xml");
 	dlbmodel.material = dlbmat;
 	
 	crystal@ crst = cast<crystal>(dlbnNode.CreateScriptObject(scriptFile,"crystal"));
@@ -1546,12 +1546,12 @@ class debrief : ScriptObject
     {
 		
 		UIElement@ LegendNode = ui.root.CreateChild("UIElement");
-		LegendNode.SetPosition(0 , -150);
+		LegendNode.SetPosition(-200 , -150);
 		LegendNode.horizontalAlignment = HA_CENTER;
 		LegendNode.verticalAlignment = VA_CENTER;
 		
 		Text@ helpText = LegendNode.CreateChild("Text");
-		helpText.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 10);
+		helpText.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 25);
 		//helpText.horizontalAlignment = HA_LEFT;
 		//helpText.verticalAlignment = VA_TOP;
 		helpText.SetPosition(0,0);
