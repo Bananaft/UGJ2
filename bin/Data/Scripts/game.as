@@ -588,7 +588,7 @@ void switchPhase()
 			StaticModel@ portalmodel = portalNode.CreateComponent("StaticModel");
 			portalmodel.model = cache.GetResource("Model", "Models/cylinder.mdl");
 			
-			Material@ prtmat = cache.GetResource("Material", "Materials/dlbmat.xml");
+			Material@ prtmat = cache.GetResource("Material", "Materials/beam.xml");
 			portalmodel.material = prtmat;
 			
 			Vector3 ppos = camNode.rotation * Vector3(0.,0.,1.);
