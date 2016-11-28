@@ -127,7 +127,7 @@ void setupLevel(int lvl)
 	health = 100;
 	 numcrystals = 0;
 	spawnCrystls = false;
-	 
+	 worldded = 180;
 	camVel = Vector3(0.,-50.,220.);
 
 	Node@ zoneNode = scene_.CreateChild("Zone");
@@ -985,7 +985,12 @@ void Update(float timeStep)
 		} else {
 			heal.gain = 0.;
 		}
-			
+		
+		if (health<0)
+		{
+			bdebrif = true;
+			node.RemoveAllComponents();
+		}
 			
 		health = Min(health,maxhealth);
 		
@@ -1008,6 +1013,7 @@ void Update(float timeStep)
 			float prange = prane.length;
 			if (prange < 5.0)
 			{
+				lvlphase++;
 				bdebrif = true;
 				node.RemoveAllComponents();
 			}
@@ -1411,7 +1417,7 @@ class intro : ScriptObject
 			story.position = Vector2(0. , story.position.y - 32.*timeStep);
 		}
 		
-		if (input.keyPress[KEY_SPACE] || input.mouseButtonPress[MOUSEB_LEFT])
+		if (input.keyPress[KEY_ESCAPE])
 		{
 			ui.Clear();
 			setupMenu();
@@ -1546,20 +1552,45 @@ class debrief : ScriptObject
     {
 		
 		UIElement@ LegendNode = ui.root.CreateChild("UIElement");
-		LegendNode.SetPosition(-200 , -150);
+		LegendNode.SetPosition(-600 , -150);
 		LegendNode.horizontalAlignment = HA_CENTER;
 		LegendNode.verticalAlignment = VA_CENTER;
 		
 		Text@ helpText = LegendNode.CreateChild("Text");
-		helpText.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 25);
+		helpText.SetFont(cache.GetResource("Font", "Fonts/Anonymous Pro.ttf"), 20);
 		//helpText.horizontalAlignment = HA_LEFT;
 		//helpText.verticalAlignment = VA_TOP;
 		helpText.SetPosition(0,0);
 		helpText.color = Color(1,1,0.5);;
-		helpText.text =
+		
+		if (lvlphase == 11)
+		{
+			helpText.text =
 						"Поздравляем! \n"
 						"Ты всех победил! \n"
-						"Молодец! \n\n";
+						"Молодец! \n\n"
+						"После того как ты прыгнул в портал появился зеленоглазый мужик с чемоданом \n"
+						"и сказал, что мол ты всё сделал, как он задумал и положил тебя в стазис на 300 лет.\n"
+						"Сказал, что разморозит, когда выйдет следующая часть.\n\n\n"
+						
+						"Большое спасибо за игру! \n"
+						"Ставьте лайки, подписывайтесь на новое видео, пока! \n"
+						"https://twitter.com/Bananaft \n";
+						
+		} else 	if (lvlphase == 10){
+			helpText.text =
+						"Грустная концовка. \n"
+						"Мир патиссонов уничтожен, \n"				
+						"но ты погиб вместе с ним. \n"
+						"Злобные головёшки прыгнули в портал вместо тебя и убили всех людей. \n";
+						
+			
+		} else {
+			helpText.text =
+						"Миссия провалена! \n"
+						"Земля была вывернута наизнанку через пятое измерение. \n"
+						"Все, кого ты знал - погибли. \n\n";	
+		}
 	}
 	void Update(float timeStep)
 	{
