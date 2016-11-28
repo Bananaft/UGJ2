@@ -112,9 +112,9 @@ void PS()
       vec3 lightVec = normalize(vec3(0.3,0.4,0.2));
       float shad = softshadow(intersection, lightVec, 0.1,250.);
 
-      col*=0.1 + shad;
+      col*=0.3 + shad;
 
-      float fog = min(pow(totalDistance/cFarClipPS,0.6),1.);//
+      float fog = min(pow(totalDistance/cFarClipPS,1.2),1.);//
 
       if (totalDistance<0.1){
          col *= vec3(1.0,0.2,0.2);

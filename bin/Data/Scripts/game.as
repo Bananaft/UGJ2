@@ -260,11 +260,11 @@ void setupLevel(int lvl)
 		
 	lavaNode = scene_.CreateChild("lavaNode");
 	lavaNode.position = Vector3(0,-40,0);
-	lavaNode.scale = Vector3(300,0,300);
+	lavaNode.scale = Vector3(450,0,450);
 	StaticModel@ lavamodel = lavaNode.CreateComponent("StaticModel");
 	lavamodel.model = cache.GetResource("Model", "Models/plane.mdl");
 	
-	Material@ lavamat = cache.GetResource("Material", "Materials/dlbmat.xml");
+	Material@ lavamat = cache.GetResource("Material", "Materials/lava.xml");
 	lavamodel.material = lavamat;
 	
 	
@@ -530,7 +530,7 @@ void switchPhase()
 		}
 		else if (lvlphase == 9)
 		{
-			spawnDolboshka(cpos + Vector3(50.,80.,0.),5.);
+			spawnDolboshka(cpos + Vector3(10.,80.,0.),5.);
 			
 			dlbtogo = 1;
 			
