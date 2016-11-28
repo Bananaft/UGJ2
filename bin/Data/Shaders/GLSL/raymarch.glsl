@@ -82,7 +82,7 @@ void PS()
        #ifdef PREMARCH
           distTrsh = pxsz * totalDistance * 1.4142;
           if(distance <= distTrsh || totalDistance >= cFarClipPS) break;
-          totalDistance += distTrsh * 0.6;
+          totalDistance += distTrsh * 0.8;
         #else
           if(distance <= 0.002 || totalDistance >= cFarClipPS) break;
        #endif

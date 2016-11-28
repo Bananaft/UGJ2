@@ -650,7 +650,6 @@ void HandleUpdate(StringHash eventType, VariantMap& eventData)
 		scene_.RemoveAllChildren();
 		startLevel(ilvl);
 		blvl = false;
-		if (ilvl == 2) spawnCrystls = true;
 	}
 	
 	if (bdebrif){
@@ -771,8 +770,8 @@ void Update(float timeStep)
 		//if (input.keyDown['R'])
         //   node.position = Vector3(0.0f , 14.0f , -20.0f);
 		   
-		if (input.keyDown['T'])
-          worldPhase = worldTPhase;
+		//if (input.keyDown['T'])
+        //  worldPhase = worldTPhase;
 		   
 		   
 		if (input.mouseButtonPress[MOUSEB_LEFT])
@@ -798,7 +797,7 @@ void Update(float timeStep)
 	
 		camVel.y -= 9.8 * time.timeStep;
 		camNode.position += camVel * time.timeStep;
-		if  (input.keyPress[KEY_C]) spawnCrystal(node.position);
+		//if  (input.keyPress[KEY_F8]) spawnCrystal(node.position);
 		
 		if (input.keyDown[KEY_SPACE] && fuel > 0.)
 		{
@@ -1125,7 +1124,7 @@ class dolboshka : ScriptObject
 		heading.Normalize();
 		float range = toCam.length;
 		
-		if (input.keyDown['R']) node.position -= (node.position - camNode.position) *0.2;
+		//if (input.keyDown['R']) node.position -= (node.position - camNode.position) *0.2;
 		
 		if(ded)
 		{
